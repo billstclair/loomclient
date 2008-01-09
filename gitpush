@@ -1,0 +1,2 @@
+# Push the HEAD to the shared repository
+git push git+ssh://repo.or.cz/srv/git/loomclient.git HEAD

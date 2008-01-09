@@ -1,0 +1,2 @@
+cd ..
+tar -czf loomclient.tar.gz loomclient

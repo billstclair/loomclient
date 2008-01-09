@@ -1,0 +1,1 @@
+java -cp loom.jar cc.loom.LoomClient $*

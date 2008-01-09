@@ -1,0 +1,35 @@
+This directory contains Java and PHP libraries for using
+http://loom.cc/ as a client. The libraries are simple enough that the
+code should be self-documentating, if you've learned enough about Loom
+to use them.
+
+The PHP library is in the file LoomClient.php. There's an example web
+form that uses it in grid-tutorial.php. Put those two files in a
+source directory for a PHP-enabled web server, and aim a browser at
+grid-tutorial.php, and you'll see it.
+
+The Java library is in java/cc/loom/LoomClient.java and as the class
+cc.loom.LoomClient in loom.jar. You can test it from the command line
+as follows:
+
+  java -cp loom.jar cc.loom.LoomClient command arguments...
+
+Where command and arguments are docmented by the usage line printed if
+you just execute:
+
+  java -cp loom.jar cc.loom.LoomClient
+
+The loomclient shell script packages up calling the client so you can
+say:
+
+  loomclient command arguments...
+
+This is safe to use with real locations, since all communication with
+loom.cc is done with an encrypted (https) link.
+
+The makeloomjar script compiles LoomClient.java and creates
+loom.jar. It must be run from within this directory.
+
+LoomClient.java currently requires Java 5 generics. There is a comment
+at the top of the file telling you how to change it to work with Java
+4 (untested).

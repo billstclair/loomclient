@@ -1,0 +1,6 @@
+cd java
+javac cc/loom/LoomClient.java
+jar -cf loom.jar cc
+mv loom.jar ..
+cd doc
+javadoc -sourcepath ../ cc.loom

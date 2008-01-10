@@ -232,7 +232,7 @@ Usage location:
 
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>>
+<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>
 </td>
 </tr>
 
@@ -266,7 +266,7 @@ Current Issuer:
 </td>
 <td>
 
-<input type=text class=tt name=issuer_orig size=36 value=<?php echo $issuer_orig;?>>>
+<input type=text class=tt name=issuer_orig size=36 value=<?php echo $issuer_orig;?>>
 </td>
 </tr>
 

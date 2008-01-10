@@ -79,6 +79,45 @@ class LoomClient
                       $url);
   }
 
+  function buy_archive($loc, $usage, &$url) {
+    return $this->get(array('function' => 'archive',
+                            'action' => 'buy',
+                            'loc' => $loc,
+                            'usage' => $usage),
+                      $url);
+  }
+
+  function sell_archive($loc, $usage, &$url) {
+    return $this->get(array('function' => 'archive',
+                            'action' => 'sell',
+                            'loc' => $loc,
+                            'usage' => $usage),
+                      $url);
+  }
+
+  function touch_archive($loc, &$url) {
+    return $this->get(array('function' => 'archive',
+                            'action' => 'touch',
+                            'loc' => $loc),
+                      $url);
+  }
+
+  function look_archive($hash, &$url) {
+    return $this->get(array('function' => 'archive',
+                            'action' => 'look',
+                            'hash' => $hash),
+                      $url);
+  }
+
+  function write_archive($loc, $usage, $content, &$url) {
+    return $this->get(array('function' => 'archive',
+                            'action' => 'write',
+                            'loc' => $loc,
+                            'usage' => $usage,
+                            'content' => $content),
+                      $url);
+  }
+
   function url($keys) {
     $str = $this->url_prefix;
     $delim = '?';

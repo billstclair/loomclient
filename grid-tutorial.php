@@ -13,10 +13,11 @@ $look_hash = htmlspecialchars($_POST['look_hash']);
 $move_qty = htmlspecialchars($_POST['move_qty']);
 $move_orig = htmlspecialchars($_POST['move_orig']);
 $move_dest = htmlspecialchars($_POST['move_dest']);
+$content = htmlspecialchars($_POST['content']);
 ?>
 <html>
 <head>
-<title>Loom Grid Tutorial in PHP</title>
+<title>Loom Grid &amp; Archive Tutorials in PHP</title>
 <style type="text/css">
 body { font-family: verdana, arial, sans-serif; font-size: 10pt }
 div { font-size:10pt }
@@ -60,14 +61,94 @@ A.name_dot { font-size:14pt; font-weight:bold; color:green; }
 </pre>
 -->
 This is a PHP translation of the Loom.cc
-<a href="https://loom.cc/?function=grid_tutorial&mode=advanced">
-grid tutorial</a>. I recommend that you avoid entering any real locations you care about on this page, since you'll be sending those locations in plain text over the web to my hosting service. The loom.cc calls from LoomClient.php ARE encrypted, though, so if you write your own web interface, and use https for your site, the entire chain to loom.cc will be encrypted.
+<?php
+if ($page != 'archive') {
+  echo '<a href="https://loom.cc/?function=grid_tutorial&mode=advanced">grid';
+ } else {
+  echo '<a href="https://loom.cc/?function=archive_tutorial&mode=advanced">archive';
+ }
+  
+?>
+ tutorial</a>. I recommend that you avoid entering any real locations you care about on this page, since you'll be sending those locations in plain text over the web to my hosting service. The loom.cc calls from LoomClient.php ARE encrypted, though, so if you write your own web interface, and use https for your site, the entire chain to loom.cc will be encrypted.
 <p>
 Download source at
 <a href="../loomclient.tar.gz">loomclient.tar.gz</a>
 <p>
-<a href="index.html">Loom Index</a>
 <hr>
+<a href="index.html">Loom Index</a> |
+<a href="grid-tutorial.php">
+<?php
+if ($page != 'archive') {
+  echo '<b>Grid</b>';
+ } else echo 'Grid';
+?>
+</a> |
+<a href="grid-tutorial.php?page=archive">
+<?php
+if ($page == 'archive') {
+  echo '<b>Archive</b>';
+ } else echo 'Archive';
+?>
+</a>
+<hr>
+<?php
+// Process the post
+
+$client = new LoomClient($loom_server);
+$res = '';
+
+if ($page != 'archive') {
+  if ($_POST['buy'] != '') {
+    $res = $client->buy($common_type, $buy_loc, $buy_usage, &$url);
+  } elseif ($_POST['sell'] != '') {
+    $res = $client->sell($common_type, $buy_loc, $buy_usage, &$url);
+  } elseif ($_POST['issuer'] != '') {
+    $res = $client->issuer($common_type, $issuer_orig, $issuer_dest, &$url);
+  } elseif ($_POST['touch'] != '') {
+    $res = $client->touch($common_type, $touch_loc, &$url);
+  } elseif ($_POST['look'] != '') {
+    $res = $client->look($common_type, $look_hash, &$url);
+  } elseif ($_POST['move'] != '') {
+    $res = $client->move($common_type, $move_qty, $move_orig, $move_dest, &$url);
+  } elseif ($_POST['move_back'] != '') {
+    $res = $client->move($common_type, $move_qty, $move_dest, $move_orig, &$url);
+  }
+} else {
+  if ($_POST['look_archive'] != '') {
+    $res = $client->look_archive($look_hash, &$url);
+    if ($res != '') $content = $res['content'];
+  } elseif ($_POST['touch_archive'] != '') {
+    $res = $client->touch_archive($touch_loc, &$url);
+    if ($res != '') {
+      $content = $res['content'];
+      $look_hash = $res['hash'];
+    }
+  } elseif ($_POST['buy_archive'] != '') {
+    $res = $client->buy_archive($touch_loc, $buy_usage, &$url);
+  } elseif ($_POST['sell_archive'] != '') {
+    $res = $client->sell_archive($touch_loc, $buy_usage, &$url);
+  } elseif ($_POST['write_archive'] != '') {
+    $res = $client->write_archive($touch_loc, $buy_usage, $content, &$url);
+  }
+}
+
+if ($page == 'archive') print_archive();
+else print_grid();
+
+if ($res != '') {
+echo $url . '<pre>';
+print_r($res);
+echo '</pre>';
+}
+?>
+</body>
+</html>
+
+<?php
+function print_grid() {
+  global $common_type, $loom_server, $buy_loc, $buy_usage, $issuer_orig;
+  global $issuer_dest, $touch_loc, $look_hash, $move_qty, $move_orig, $move_dest;
+?>
 <p>
 This is an interactive tutorial to help you set up and test grid operations.
 Be careful using sensitive locations in this tutorial, since they do show
@@ -367,39 +448,109 @@ echo 'value="' . $move_dest . '"'
 </table>
 
 </form>
-
 <?php
-// Process the post
-
-$client = new LoomClient($loom_server);
-$res = '';
-
-if ($_POST['buy'] != '') {
-  $res = $client->buy($common_type, $buy_loc, $buy_usage, &$url);
-} elseif ($_POST['sell'] != '') {
-  $res = $client->sell($common_type, $buy_loc, $buy_usage, &$url);
-} elseif ($_POST['issuer'] != '') {
-  $res = $client->issuer($common_type, $issuer_orig, $issuer_dest, &$url);
-} elseif ($_POST['touch'] != '') {
-  $res = $client->touch($common_type, $touch_loc, &$url);
-} elseif ($_POST['look'] != '') {
-  $res = $client->look($common_type, $look_hash, &$url);
-} elseif ($_POST['move'] != '') {
-  $res = $client->move($common_type, $move_qty, $move_orig, $move_dest, &$url);
-} elseif ($_POST['move_back'] != '') {
-  $res = $client->move($common_type, $move_qty, $move_dest, $move_orig, &$url);
 }
 
-if ($res != '') {
-echo $url . '<pre>';
-print_r($res);
-echo '</pre>';
-}
+function print_archive() {
+  global $loom_server, $look_hash, $touch_loc, $buy_usage, $content;
 ?>
-</body>
-</html>
+<form method=post action="grid-tutorial.php?page=archive" autocomplete=off>
+
+<p>
+This screen is a simple user interface into the archive function <a href="https://loom.cc/?function=help&amp;topic=archive&amp;mode=advanced">documented here</a>.
+It also serves as a tutorial, showing you the API url and result.
+
+<p>
+<table border=0 style='border-collapse:collapse'>
+<colgroup>
+<col width=150>
+<col width=700>
+
+</colgroup>
+
+<tr>
+<td>
+Loom server:
+</td>
+<td>
+<input type=text class=tt name=loom_server size=50
+<?php
+echo 'value="' . $loom_server . '"';
+?>
+>
+</td>
+</tr>
+<tr>
+<td>
+Archive Hash:
+</td>
+<td>
+<input type=text class=tt name=look_hash size=72
+ <?php
+echo 'value="' . $look_hash . '"';
+?>
+>
+<input type=submit name=look_archive value="Look">
+</td>
+</tr>
+
+<tr>
+<td>
+Archive Location:
+</td>
+<td>
+
+<input type=text class=tt name=touch_loc size=36
+<?php
+echo 'value="' . $touch_loc . '"';
+?>
+>
+<input type=submit name=touch_archive value="Touch">
+<input type=submit name=buy_archive value="Buy">
+<input type=submit name=sell_archive value="Sell">
+
+</td>
+</tr>
+
+<tr>
+<td>
+Usage Location:
+</td>
+<td>
+<input type=text class=tt name=buy_usage size=36
+<?php
+echo 'value="' . $buy_usage . '"';
+?>
+>
+</td>
+</tr>
+
+<tr>
+<td>
+Archive Content:
+</td>
+<td>
+<a href="https://loom.cc/?function=view" title="View as web page">View</a>
+<input type=submit name=write_archive value="Write">
+
+</td>
+</tr>
+<tr>
+<td colspan=2>
+<textarea name=content rows=20 cols=120>
+<?php
+echo $content;
+?>
+</textarea>
+</td>
+</tr>
+
+</table>
+</form>
 
 <?php
+}
+
 // Copyright 2007 Bill St. Clair
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

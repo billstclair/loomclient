@@ -1,6 +1,7 @@
 <?php
 require "LoomClient.php";
 
+$page = htmlspecialchars($_GET['page']);
 $common_type = htmlspecialchars($_POST['common_type']);
 $loom_server = htmlspecialchars($_POST['loom_server']);
 if ($loom_server == '') $loom_server = 'https://loom.cc/';

@@ -122,7 +122,7 @@ if ($page != 'archive') {
     $res = $client->touch_archive($touch_loc, &$url);
     if ($res != '') {
       $content = $res['content'];
-      $look_hash = $res['hash'];
+      if ($res['hash'] != '') $look_hash = $res['hash'];
     }
   } elseif ($_POST['buy_archive'] != '') {
     $res = $client->buy_archive($touch_loc, $buy_usage, &$url);
@@ -179,11 +179,7 @@ up in plain text on this screen. The grid API is <a href="https://loom.cc/?funct
 Asset Type:
 </td>
 <td>
-<input type=text class=tt name=common_type size=36 
-<?php
-echo 'value="' . $common_type . '"';
-?>
->
+<input type=text class=tt name=common_type size=36 value=<?php echo($common_type); ?>>
 </td>
 </tr>
 
@@ -192,11 +188,7 @@ echo 'value="' . $common_type . '"';
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50
-<?php
-echo 'value="' . $loom_server . '"';
-?>
->
+<input type=text class=tt name=loom_server size=50 value=<?php echo $loom_server; ?>>
 </td>
 </tr>
 
@@ -230,11 +222,7 @@ Buy location for one usage token, or sell location for refund.
 Location:
 </td>
 <td>
-<input type=text class=tt name=buy_loc size=36 
-<?php
-echo 'value="' . $buy_loc . '"'
-?>
->
+<input type=text class=tt name=buy_loc size=36 value=<?php echo $buy_loc; ?>>
 </td>
 </tr>
 
@@ -244,11 +232,7 @@ Usage location:
 
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 
-<?php
-echo 'value="' . $buy_usage . '"'
-?>
->
+<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>>
 </td>
 </tr>
 
@@ -282,11 +266,7 @@ Current Issuer:
 </td>
 <td>
 
-<input type=text class=tt name=issuer_orig size=36 
-<?php
-echo 'value="' . $issuer_orig . '"'
-?>
->
+<input type=text class=tt name=issuer_orig size=36 value=<?php echo $issuer_orig;?>>>
 </td>
 </tr>
 
@@ -295,11 +275,7 @@ echo 'value="' . $issuer_orig . '"'
 New Issuer:
 </td>
 <td>
-<input type=text class=tt name=issuer_dest size=36 
-<?php
-echo 'value="' . $issuer_dest . '"'
-?>
->
+<input type=text class=tt name=issuer_dest size=36 value=<?php echo $issuer_dest; ?>>
 </td>
 </tr>
 
@@ -332,10 +308,7 @@ Touch a location directly to see its value.
 Location:
 </td>
 <td>
-<input type=text class=tt name=touch_loc size=36 
-<?php
-echo 'value="' . $touch_loc . '"'
-?>
+<input type=text class=tt name=touch_loc size=36 value=<?php echo $touch_loc; ?>>
 </td>
 </tr>
 
@@ -368,11 +341,7 @@ Look at a location by its hash.
 Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72 
-<?php
-echo 'value="' . $look_hash . '"'
-?>
->
+<input type=text class=tt name=look_hash size=72 value=<?php echo $look_hash; ?>>
 </td>
 </tr>
 
@@ -407,11 +376,7 @@ Move units from one location to another.
 Quantity:
 </td>
 <td>
-<input type=text class=tt name=move_qty size=45 
-<?php
-echo 'value="' . $move_qty . '"'
-?>
->
+<input type=text class=tt name=move_qty size=45 value=<?php echo $move_qty; ?>>
 </td>
 </tr>
 
@@ -420,11 +385,7 @@ echo 'value="' . $move_qty . '"'
 Origin:
 </td>
 <td>
-<input type=text class=tt name=move_orig size=36
-<?php
-echo 'value="' . $move_orig . '"';
-?>
->
+<input type=text class=tt name=move_orig size=36 value=<?php echo $move_orig; ?>>
 </td>
 </tr>
 
@@ -433,11 +394,7 @@ echo 'value="' . $move_orig . '"';
 Destination:
 </td>
 <td>
-<input type=text class=tt name=move_dest size=36 
-<?php
-echo 'value="' . $move_dest . '"'
-?>
->
+<input type=text class=tt name=move_dest size=36 value=<?php echo $move_dest; ?>>
 </td>
 </tr>
 
@@ -474,11 +431,7 @@ It also serves as a tutorial, showing you the API url and result.
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50
-<?php
-echo 'value="' . $loom_server . '"';
-?>
->
+<input type=text class=tt name=loom_server size=50 value=<?php echo $loom_server ?>>
 </td>
 </tr>
 <tr>
@@ -486,11 +439,7 @@ echo 'value="' . $loom_server . '"';
 Archive Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72
- <?php
-echo 'value="' . $look_hash . '"';
-?>
->
+<input type=text class=tt name=look_hash size=72 value=<?php echo $look_hash; ?>>
 <input type=submit name=look_archive value="Look">
 </td>
 </tr>
@@ -501,11 +450,7 @@ Archive Location:
 </td>
 <td>
 
-<input type=text class=tt name=touch_loc size=36
-<?php
-echo 'value="' . $touch_loc . '"';
-?>
->
+<input type=text class=tt name=touch_loc size=36 value=<?php echo $touch_loc; ?>>
 <input type=submit name=touch_archive value="Touch">
 <input type=submit name=buy_archive value="Buy">
 <input type=submit name=sell_archive value="Sell">
@@ -518,11 +463,7 @@ echo 'value="' . $touch_loc . '"';
 Usage Location:
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36
-<?php
-echo 'value="' . $buy_usage . '"';
-?>
->
+<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>
 </td>
 </tr>
 
@@ -539,9 +480,7 @@ Archive Content:
 <tr>
 <td colspan=2>
 <textarea name=content rows=20 cols=120>
-<?php
-echo $content;
-?>
+<?php echo $content; ?>
 </textarea>
 </td>
 </tr>

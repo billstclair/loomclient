@@ -100,9 +100,6 @@ class LoomClient
                             'action' => 'touch',
                             'loc' => $loc),
                       $url);
-    if ($res['content'] != '') {
-      $res['content'] = $this->unquote_cstring($res['content']);
-    }
     return $res;
   }
 
@@ -111,9 +108,6 @@ class LoomClient
                            'action' => 'look',
                            'hash' => $hash),
                      $url);
-    if ($res['content'] != '') {
-      $res['content'] = $this->unquote_cstring($res['content']);
-    }
     return $res;
   }
 
@@ -137,8 +131,6 @@ class LoomClient
     return $str;
   }
 
-  // This needs to un-c-code the return.
-  // e.g. "\n" -> newline
   function parsekv($kv) {
     $lines = explode("\n", $kv);
     $first = true;
@@ -151,12 +143,13 @@ class LoomClient
       if ($line == ')') return $res;
       if (substr($line, 0, 1) == ':') $key = substr($line, 1);
       if (substr($line, 0, 1) == '=') {
-        $value = substr($line, 1);
+        $value = $this->unquote_cstring(substr($line, 1));
         $res[$key] = $value;
       }
     }
   }
 
+  // Not used yet
   function quote_cstring($cstring) {
     $res = '';
     for ($i=0; $i<strlen($cstring); $i++) {
@@ -207,7 +200,7 @@ class LoomClient
     return $res;
   }
 
-  // This enable a kluge in get() to turn off the protocl warning that
+  // This enables a kluge in get() to turn off the protocol warning that
   // results from doing a HTTP GET to http://loom.cc/
   function disable_warnings() {
     $erpt = error_reporting();

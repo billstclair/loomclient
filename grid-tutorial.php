@@ -146,7 +146,7 @@ if ($page == 'archive') print_archive();
 else print_grid();
 
 if ($res != '') {
-echo "<b>URL</b><p>$url<p><b>Result (in KV format)</b><p><pre>";
+echo "<p><b>URL</b><p>$url<p><b>Result (in KV format)</b><p><pre>";
 echo "(\n";
 foreach ($res as $key => $value) {
   echo ":" . htmlspecialchars($client->quote_cstring($key)) . "\n";

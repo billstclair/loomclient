@@ -147,7 +147,6 @@ class LoomClient
     }
   }
 
-  // Not used yet
   function quote_cstring($cstring) {
     $res = '';
     for ($i=0; $i<strlen($cstring); $i++) {

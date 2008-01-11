@@ -247,6 +247,8 @@ public class LoomClient {
      * @param kv The KV string
      * @return null if there is no opening left paren on the first line.
      */
+    // This needs to un-c-code the return.
+    // e.g. "\n" -> newline
     public KV parsekv(String kv) {
         StringTokenizer tok = new StringTokenizer(kv, "\n");
         boolean first = true;
@@ -419,7 +421,7 @@ public class LoomClient {
     }
 }
 
-// Copyright 2007 Bill St. Clair
+// Copyright 2008 Bill St. Clair
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

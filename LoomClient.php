@@ -96,17 +96,25 @@ class LoomClient
   }
 
   function touch_archive($loc, &$url) {
-    return $this->get(array('function' => 'archive',
+    $res = $this->get(array('function' => 'archive',
                             'action' => 'touch',
                             'loc' => $loc),
                       $url);
+    if ($res['content'] != '') {
+      $res['content'] = $this->unquote_cstring($res['content']);
+    }
+    return $res;
   }
 
   function look_archive($hash, &$url) {
-    return $this->get(array('function' => 'archive',
-                            'action' => 'look',
-                            'hash' => $hash),
-                      $url);
+    $res =$this->get(array('function' => 'archive',
+                           'action' => 'look',
+                           'hash' => $hash),
+                     $url);
+    if ($res['content'] != '') {
+      $res['content'] = $this->unquote_cstring($res['content']);
+    }
+    return $res;
   }
 
   function write_archive($loc, $usage, $content, &$url) {
@@ -114,6 +122,7 @@ class LoomClient
                             'action' => 'write',
                             'loc' => $loc,
                             'usage' => $usage,
+//                            'content' => ($this->quote_cstring($content))),
                             'content' => $content),
                       $url);
   }
@@ -128,6 +137,8 @@ class LoomClient
     return $str;
   }
 
+  // This needs to un-c-code the return.
+  // e.g. "\n" -> newline
   function parsekv($kv) {
     $lines = explode("\n", $kv);
     $first = true;
@@ -144,6 +155,56 @@ class LoomClient
         $res[$key] = $value;
       }
     }
+  }
+
+  function quote_cstring($cstring) {
+    $res = '';
+    for ($i=0; $i<strlen($cstring); $i++) {
+      $chr = substr($cstring, $i, 1);
+      if ($chr == "\n") $res .= '\n';
+      elseif ($chr == '"') $res .= '\"';
+      elseif ($chr == "\t") $res .= '\t';
+      elseif ($chr == "\\") $res .= "\\\\";
+      elseif ($chr < ' ' || $chr > '~') $res .= '\\'.sprintf('%03o', ord($chr));
+      else $res .= $chr;
+    }
+    return $res;
+  }
+
+  function unquote_cstring($cstring) {
+    $res = '';
+    $len = strlen($cstring);
+    $i = 0;
+    while ($i<$len) {
+      $chr = substr($cstring, $i, 1);
+      if ($chr == "\\") {
+        $i++;
+        if ($i >= $len) {
+          $res .= $chr;
+          break;
+        }
+        $chr = substr($cstring, $i, 1);
+        if ($chr == 'n') $res .= "\n";
+        elseif ($chr == '"') $res .= '"';
+        elseif ($chr == 't') $res .= "\t";
+        elseif ($chr == "\\") $res .= "\\";
+        elseif ($chr >= '0' and $chr <= '9') {
+          if ($len < ($i + 3)) {
+            $res .= substr($cstring, $i-1);
+            break;
+          }
+          sscanf(substr($cstring, $i, 3), '%o', &$n);
+          $res .= chr($n);
+          $i += 2;
+        }
+        else $res .= "\\" . $chr;
+      }
+      else {
+        $res .= $chr;
+      }
+      $i++;
+    }
+    return $res;
   }
 
   // This enable a kluge in get() to turn off the protocl warning that
@@ -171,7 +232,7 @@ echo $url . "\n";
 print_r($values);
 */
 
-// Copyright 2007 Bill St. Clair
+// Copyright 2008 Bill St. Clair
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

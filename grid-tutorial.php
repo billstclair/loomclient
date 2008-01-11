@@ -179,7 +179,7 @@ up in plain text on this screen. The grid API is <a href="https://loom.cc/?funct
 Asset Type:
 </td>
 <td>
-<input type=text class=tt name=common_type size=36 value=<?php echo($common_type); ?>>
+<input type=text class=tt name=common_type size=36 value=<? echo($common_type); ?>>
 </td>
 </tr>
 
@@ -188,7 +188,7 @@ Asset Type:
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<?php echo $loom_server; ?>>
+<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server; ?>>
 </td>
 </tr>
 
@@ -222,7 +222,7 @@ Buy location for one usage token, or sell location for refund.
 Location:
 </td>
 <td>
-<input type=text class=tt name=buy_loc size=36 value=<?php echo $buy_loc; ?>>
+<input type=text class=tt name=buy_loc size=36 value=<? echo $buy_loc; ?>>
 </td>
 </tr>
 
@@ -232,7 +232,7 @@ Usage location:
 
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>
+<input type=text class=tt name=buy_usage size=36 value=<? echo $buy_usage; ?>>
 </td>
 </tr>
 
@@ -266,7 +266,7 @@ Current Issuer:
 </td>
 <td>
 
-<input type=text class=tt name=issuer_orig size=36 value=<?php echo $issuer_orig;?>>
+<input type=text class=tt name=issuer_orig size=36 value=<? echo $issuer_orig;?>>
 </td>
 </tr>
 
@@ -275,7 +275,7 @@ Current Issuer:
 New Issuer:
 </td>
 <td>
-<input type=text class=tt name=issuer_dest size=36 value=<?php echo $issuer_dest; ?>>
+<input type=text class=tt name=issuer_dest size=36 value=<? echo $issuer_dest; ?>>
 </td>
 </tr>
 
@@ -308,7 +308,7 @@ Touch a location directly to see its value.
 Location:
 </td>
 <td>
-<input type=text class=tt name=touch_loc size=36 value=<?php echo $touch_loc; ?>>
+<input type=text class=tt name=touch_loc size=36 value=<? echo $touch_loc; ?>>
 </td>
 </tr>
 
@@ -341,7 +341,7 @@ Look at a location by its hash.
 Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72 value=<?php echo $look_hash; ?>>
+<input type=text class=tt name=look_hash size=72 value=<? echo $look_hash; ?>>
 </td>
 </tr>
 
@@ -376,7 +376,7 @@ Move units from one location to another.
 Quantity:
 </td>
 <td>
-<input type=text class=tt name=move_qty size=45 value=<?php echo $move_qty; ?>>
+<input type=text class=tt name=move_qty size=45 value=<? echo $move_qty; ?>>
 </td>
 </tr>
 
@@ -385,7 +385,7 @@ Quantity:
 Origin:
 </td>
 <td>
-<input type=text class=tt name=move_orig size=36 value=<?php echo $move_orig; ?>>
+<input type=text class=tt name=move_orig size=36 value=<? echo $move_orig; ?>>
 </td>
 </tr>
 
@@ -394,7 +394,7 @@ Origin:
 Destination:
 </td>
 <td>
-<input type=text class=tt name=move_dest size=36 value=<?php echo $move_dest; ?>>
+<input type=text class=tt name=move_dest size=36 value=<? echo $move_dest; ?>>
 </td>
 </tr>
 
@@ -431,7 +431,7 @@ It also serves as a tutorial, showing you the API url and result.
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<?php echo $loom_server ?>>
+<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server ?>>
 </td>
 </tr>
 <tr>
@@ -439,7 +439,7 @@ Loom server:
 Archive Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72 value=<?php echo $look_hash; ?>>
+<input type=text class=tt name=look_hash size=72 value=<? echo $look_hash; ?>>
 <input type=submit name=look_archive value="Look">
 </td>
 </tr>
@@ -450,7 +450,7 @@ Archive Location:
 </td>
 <td>
 
-<input type=text class=tt name=touch_loc size=36 value=<?php echo $touch_loc; ?>>
+<input type=text class=tt name=touch_loc size=36 value=<? echo $touch_loc; ?>>
 <input type=submit name=touch_archive value="Touch">
 <input type=submit name=buy_archive value="Buy">
 <input type=submit name=sell_archive value="Sell">
@@ -463,7 +463,7 @@ Archive Location:
 Usage Location:
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 value=<?php echo $buy_usage; ?>>
+<input type=text class=tt name=buy_usage size=36 value=<? echo $buy_usage; ?>>
 </td>
 </tr>
 
@@ -472,7 +472,7 @@ Usage Location:
 Archive Content:
 </td>
 <td>
-<a href="https://loom.cc/?function=view" title="View as web page">View</a>
+<a href="<? echo $loom_server; ?>?function=view&hash=<? echo $look_hash; ?>" title="View as web page">View</a>
 <input type=submit name=write_archive value="Write">
 
 </td>
@@ -480,7 +480,7 @@ Archive Content:
 <tr>
 <td colspan=2>
 <textarea name=content rows=20 cols=120>
-<?php echo $content; ?>
+<? echo $content; ?>
 </textarea>
 </td>
 </tr>
@@ -491,7 +491,7 @@ Archive Content:
 <?php
 }
 
-// Copyright 2007 Bill St. Clair
+// Copyright 2008 Bill St. Clair
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

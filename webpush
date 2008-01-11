@@ -1,0 +1,4 @@
+rsyncit -av *
+cd ..
+rsyncit -av loomclient.tar.gz
+cd loomclient

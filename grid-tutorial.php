@@ -138,6 +138,7 @@ if ($page != 'archive') {
     $res = $client->sell_archive($touch_loc, $buy_usage, &$url);
   } elseif ($_POST['write_archive'] != '') {
     $res = $client->write_archive($touch_loc, $buy_usage, $content, &$url);
+    if ($res['hash'] != '') $look_hash = $res['hash'];
   }
 }
 

@@ -125,11 +125,11 @@ if ($page != 'archive') {
 } else {
   if ($_POST['look_archive'] != '') {
     $res = $client->look_archive($look_hash, &$url);
-    if ($res != '') $content = $res['content'];
+    if ($res != '') $content = htmlspecialchars($res['content']);
   } elseif ($_POST['touch_archive'] != '') {
     $res = $client->touch_archive($touch_loc, &$url);
     if ($res != '') {
-      $content = $res['content'];
+      $content = htmlspecialchars($res['content']);
       if ($res['hash'] != '') $look_hash = $res['hash'];
     }
   } elseif ($_POST['buy_archive'] != '') {
@@ -137,7 +137,7 @@ if ($page != 'archive') {
   } elseif ($_POST['sell_archive'] != '') {
     $res = $client->sell_archive($touch_loc, $buy_usage, &$url);
   } elseif ($_POST['write_archive'] != '') {
-    $res = $client->write_archive($touch_loc, $buy_usage, $content, &$url);
+    $res = $client->write_archive($touch_loc, $buy_usage, html_entity_decode($content), &$url);
     if ($res['hash'] != '') $look_hash = $res['hash'];
   }
 }

@@ -3,8 +3,9 @@ require "LoomClient.php";
 
 $page = htmlspecialchars($_GET['page']);
 $common_type = htmlspecialchars($_POST['common_type']);
-$loom_server = htmlspecialchars($_POST['loom_server']);
-if ($loom_server == '') $loom_server = 'https://loom.cc/';
+$default_server = 'https://loom.cc/';
+$loom_server = htmlspecialchars($_REQUEST['loom_server']);
+if ($loom_server == '') $loom_server = $default_server;
 $buy_loc = htmlspecialchars($_POST['buy_loc']);
 $buy_usage = htmlspecialchars($_POST['buy_usage']);
 $issuer_orig = htmlspecialchars($_POST['issuer_orig']);
@@ -15,6 +16,13 @@ $move_qty = htmlspecialchars($_POST['move_qty']);
 $move_orig = htmlspecialchars($_POST['move_orig']);
 $move_dest = htmlspecialchars($_POST['move_dest']);
 $content = htmlspecialchars($_POST['content']);
+
+function maybe_echo_server($q) {
+  global $loom_server, $default_server;
+  if ($loom_server != $default_server) {
+    echo $q . 'loom_server=' . urlencode($loom_server);
+  }
+}
 ?>
 <html>
 <head>
@@ -77,14 +85,14 @@ Download source at
 <p>
 <hr>
 <a href="index.html">Loom Index</a> |
-<a href="grid-tutorial.php">
+<a href="grid-tutorial.php<? maybe_echo_server('?'); ?>">
 <?php
 if ($page != 'archive') {
   echo '<b>Grid</b>';
  } else echo 'Grid';
 ?>
 </a> |
-<a href="grid-tutorial.php?page=archive">
+<a href="grid-tutorial.php?page=archive<? maybe_echo_server('&'); ?>">
 <?php
 if ($page == 'archive') {
   echo '<b>Archive</b>';

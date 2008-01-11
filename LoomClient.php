@@ -96,19 +96,17 @@ class LoomClient
   }
 
   function touch_archive($loc, &$url) {
-    $res = $this->get(array('function' => 'archive',
+    return $this->get(array('function' => 'archive',
                             'action' => 'touch',
                             'loc' => $loc),
                       $url);
-    return $res;
   }
 
   function look_archive($hash, &$url) {
-    $res =$this->get(array('function' => 'archive',
-                           'action' => 'look',
-                           'hash' => $hash),
-                     $url);
-    return $res;
+    return $this->get(array('function' => 'archive',
+                            'action' => 'look',
+                            'hash' => $hash),
+                      $url);
   }
 
   function write_archive($loc, $usage, $content, &$url) {

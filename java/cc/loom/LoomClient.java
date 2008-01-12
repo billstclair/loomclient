@@ -225,6 +225,129 @@ public class LoomClient {
         return get(keys, urlv);
     }
 
+    /*
+     * Archive functions
+     */
+
+    /**
+     * Buy an archive location
+     * @param loc The location to buy
+     * @param usage The location of at least one usage token with which to pay
+     */
+    public KV buyArchive(String loc, String usage) {
+        return buyArchive(loc, usage, null);
+    }
+
+    /**
+     * Buy an archive location, implementation and debugging version
+     * @param loc The location to buy
+     * @param usage The location of at least one usage token with which to pay
+     * @param urlv index 0 filled on output with the URL string
+     */
+    public KV buyArchive(String loc, String usage, String[] urlv) {
+        KV keys = new KV();
+        keys.put("function", "archive");
+        keys.put("action", "buy");
+        keys.put("loc", loc);
+        keys.put("usage", usage);
+        return get(keys, urlv);
+    }
+
+    /**
+     * Sell an archive location.
+     * The location must be empty. Write "" to it before selling.
+     * @param loc The location to sell
+     * @param usage The location into which to put a usage token
+     */
+    public KV sellArchive(String loc, String usage) {
+        return sellArchive(loc, usage, null);
+    }
+
+    /**
+     * Sell an archive location, implementation and debugging version
+     * The location must be empty. Write "" to it before selling.
+     * @param loc The location to sell
+     * @param usage The location into which to put a usage token.
+     * @param urlv index 0 filled on output with the URL string
+     */
+    public KV sellArchive(String loc, String usage, String[] urlv) {
+        KV keys = new KV();
+        keys.put("function", "archive");
+        keys.put("action", "sell");
+        keys.put("loc", loc);
+        keys.put("usage", usage);
+        return get(keys, urlv);
+    }
+
+    /**
+     * Touch an archive location.
+     * @param loc The location to touch
+     */
+    public KV touchArchive(String loc) {
+        return touchArchive(loc, null);
+    }
+
+    /**
+     * Touch an archive location, implementation and debugging version
+     * @param loc The location to touch
+     * @param urlv index 0 filled on output with the URL string
+     */
+    public KV touchArchive(String loc, String[] urlv) {
+        KV keys = new KV();
+        keys.put("function", "archive");
+        keys.put("action", "touch");
+        keys.put("loc", loc);
+        return get(keys, urlv);
+    }
+
+    /**
+     * Look at an archive location, using its location's hash
+     * @param hash The hash of the location to look at.
+     */
+    public KV lookArchive(String hash) {
+        return lookArchive(hash, null);
+    }
+
+    /**
+     * Look at an archive location, using its location's hash.
+     * Implementation and debugging version.
+     * @param hash The hash of the location to look at.
+     * @param urlv index 0 filled on output with the URL string
+     */
+    public KV lookArchive(String hash, String[] urlv) {
+        KV keys = new KV();
+        keys.put("function", "archive");
+        keys.put("action", "look");
+        keys.put("hash", hash);
+        return get(keys, urlv);
+    }
+
+    /**
+     * Write at an archive location.
+     * @param loc The location to write
+     * @param usage The location of 1 usage token per 16 bytes written (delta from old value).
+     * @param content The content to write
+     */
+    public KV writeArchive(String loc, String usage, String content) {
+        return writeArchive(loc, usage, content, null);
+    }
+
+    /**
+     * Write at an archive location, implementation and debugging version.
+     * @param loc The location to write
+     * @param usage The location of 1 usage token per 16 bytes written (delta from old value).
+     * @param content The content to write
+     */
+    public KV writeArchive(String loc, String usage, String content, String[] urlv) {
+        KV keys = new KV();
+        keys.put("function", "archive");
+        keys.put("action", "write");
+        keys.put("loc", loc);
+        keys.put("usage", usage);
+        keys.put("content", content);
+        return get(keys, urlv);
+    }
+
     /**
      * Return the URL corresponding to a set of keys
      * @param keys the keys
@@ -249,7 +372,7 @@ public class LoomClient {
      */
     // This needs to un-c-code the return.
     // e.g. "\n" -> newline
-    public KV parsekv(String kv) {
+    public static KV parsekv(String kv) {
         StringTokenizer tok = new StringTokenizer(kv, "\n");
         boolean first = true;
         KV res = null;
@@ -265,7 +388,7 @@ public class LoomClient {
             if (line.equals(")")) return res;
             if (line.charAt(0) == ':') key = line.substring(1);
             else if (line.charAt(0) == '=') {
-                value = line.substring(1);
+                value = unquoteCString(line.substring(1));
                 res.put(key, value);
             }
         }
@@ -273,9 +396,65 @@ public class LoomClient {
     }
 
     /**
+     * CQuote a string. Opposite of unquoteCstring()
+     * @param cstring the string to quote
+     */
+    public static String quoteCString(String cstring) {
+        StringBuffer buf = new StringBuffer();
+        for (int i=0; i<cstring.length(); i++) {
+            char chr = cstring.charAt(i);
+            if (chr == '\n') buf.append("\\n");
+            else if (chr == '"') buf.append("\\\"");
+            else if (chr == '\t') buf.append("\\t");
+            else if (chr == '\\') buf.append("\\\\");
+            else if (chr < ' ' || chr > '~') {
+                buf.append('\\').append(String.format("%03o", (int)chr));
+            } else buf.append(chr);
+        }
+        return buf.toString();
+    }
+
+    /**
+     * Un-CQuote a string. The opposite of quoteCString()
+     * @param cstring The string to unquote.
+     */
+    public static String unquoteCString(String cstring) {
+        StringBuffer buf = new StringBuffer();
+        int len = cstring.length();
+        int i = 0;
+        while (i < len) {
+            char chr = cstring.charAt(i);
+            if (chr == '\\') {
+                i++;
+                if (i >= len) {
+                    buf.append(chr);
+                    break;
+                }
+                chr = cstring.charAt(i);
+                if (chr == 'n') buf.append('\n');
+                else if (chr == '"') buf.append('"');
+                else if (chr == 't') buf.append('\t');
+                else if (chr == '\\') buf.append('\\');
+                else if (chr >= '0' && chr <= '9') {
+                    if (len < (i + 3)) {
+                        buf.append(cstring.substring(i-1));
+                        break;
+                    }
+                    buf.append((char)Integer.parseInt(cstring.substring(i, i+3), 8));
+                    i += 2;
+                } else buf.append('\\').append(chr);
+            } else {
+                buf.append(chr);
+            }
+            i++;
+        }
+        return buf.toString();
+    }
+
+    /**
      * Fetch the contents of a URL as a string
      */
-    public String fetchURLString(String address) {
+    public static String fetchURLString(String address) {
         //println("URL: " + address);
         char[] buf = new char[4096];
         try {
@@ -298,7 +477,7 @@ public class LoomClient {
     /**
      * Encode a string for a URL
      */
-    public String urlencode(String str) {
+    public static String urlencode(String str) {
         try {
             return java.net.URLEncoder.encode(str, "UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
@@ -324,6 +503,11 @@ public class LoomClient {
         println("  touch type location");
         println("  look type hash");
         println("  move type qty orig dest");
+        println("  buyarch loc usage");
+        println("  sellarch loc usage");
+        println("  toucharch loc");
+        println("  lookarch hash");
+        println("  writearch loc usage content");
     }
 
     /**
@@ -331,11 +515,14 @@ public class LoomClient {
      */
     public static void printKV(KV kv) {
         Iterator keys = kv.keySet().iterator();
+        println("(");
         while(keys.hasNext()) {
             String key = (String)keys.next();
             String value = kv.get(key);
-            println(key + " => " + value);
+            println(":" + quoteCString(key));
+            println("=" + quoteCString(value));
         }
+        println(")");
     }
 
     /**
@@ -390,6 +577,40 @@ public class LoomClient {
             String orig = args[3];
             String dest = args[4];
             kv = client.move(type, qty, orig, dest, urlv);
+        } else if (function.equals("buyarch")) {
+            if (args.length != 3) {
+                usage(); return;
+            }
+            String loc = args[1];
+            String usage = args[2];
+            kv = client.buyArchive(loc, usage, urlv);
+        } else if (function.equals("sellarch")) {
+            if (args.length != 3) {
+                usage(); return;
+            }
+            String loc = args[1];
+            String usage = args[2];
+            kv = client.sellArchive(loc, usage, urlv);
+        } else if (function.equals("toucharch")) {
+            if (args.length != 2) {
+                usage(); return;
+            }
+            String loc = args[1];
+            kv = client.touchArchive(loc, urlv);
+        } else if (function.equals("lookarch")) {
+            if (args.length != 2) {
+                usage(); return;
+            }
+            String hash = args[1];
+            kv = client.lookArchive(hash, urlv);
+        } else if (function.equals("writearch")) {
+            if (args.length != 4) {
+                usage(); return;
+            }
+            String loc = args[1];
+            String usage = args[2];
+            String content = args[3];
+            kv = client.writeArchive(loc, usage, content, urlv);
         } else {
             usage();
         }

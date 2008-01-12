@@ -114,7 +114,6 @@ class LoomClient
                             'action' => 'write',
                             'loc' => $loc,
                             'usage' => $usage,
-//                            'content' => ($this->quote_cstring($content))),
                             'content' => $content),
                       $url);
   }

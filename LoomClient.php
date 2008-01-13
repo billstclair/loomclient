@@ -1,4 +1,5 @@
 <?php
+require_once "bcbitwise.php";
 
 /*
  * Client to the webapp at http://loom.cc/
@@ -8,16 +9,18 @@
 class LoomClient
 {
   var $url_prefix;              // Who you gonna call?
+  var $bits128;                 // 128 1-bits = 2**128 - 1
 
   function LoomClient($prefix = 'https://loom.cc/') {
     if (substr($prefix, -1) != '/') $prefix .= '/';
     $this->url_prefix = $prefix;
+    $this->bits128  = bcsub(bcleftshift(1, 128), 1);
   }
 
   // This is all you really need to call
   // The functions below are just syntactic sugar for calling get()
   function get($keys, &$url) {
-    $url = $this->url($keys);
+    $url = $this->url($this->url_prefix, $keys);
     // Kluge around protocol warning
     // I really want try/finally here, but PHP doesn't have it
     $erpt = $this->disable_warnings();
@@ -118,8 +121,8 @@ class LoomClient
                       $url);
   }
 
-  function url($keys) {
-    $str = $this->url_prefix;
+  function url($prefix, $keys) {
+    $str = $prefix;
     $delim = '?';
     foreach($keys as $key => $value) {
       $str .= $delim . $key . '=' . urlencode($value);
@@ -207,7 +210,32 @@ class LoomClient
   function reenable_warnings($erpt) {
     error_reporting($erpt);
   }
-}
+
+  // Return the sha256 hash of a string, encoded as hex
+  function sha256($str) {
+    $ctx = hash_init('sha256');
+    hash_update($ctx, $str);
+    return hash_final($ctx);
+  }
+
+  // PHP has bin2hex($x). An easier to remember name for pack("H*", $x)
+  // Note that this does NOT get you a string that looks like a decimal number.
+  // It's raw bits, 8 bits per characetr.
+  function hex2bin($x) {
+    return pack("H*", $x);
+  }
+
+  // Loom changes an SHA256 hash to a location by xoring the two halves
+  // Input and output are both encoded as hex
+  // Won't work correctly 
+  function hash2location($hash) {
+    $value = bchexdec($hash);
+    $bits128 = $this->bits128;
+    $location = bcxor(bcrightshift($value, 128), bcand($value, $bits128));
+    return bcdechex($location);
+  }
+
+} // End of LoomClient class
 
 
 /* Testing code. Uncomment to run.

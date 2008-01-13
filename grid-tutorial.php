@@ -1,11 +1,16 @@
 <?php
-require "LoomClient.php";
+require_once "LoomClient.php";
+require_once "LoomRandom.php";
+require_once "bcbitwise.php";
+//require_once "Diceware.php";
 
 $page = htmlspecialchars($_GET['page']);
+if ($page == '') $page = 'grid';
 $common_type = htmlspecialchars($_POST['common_type']);
 $default_server = 'https://loom.cc/';
 $loom_server = htmlspecialchars($_REQUEST['loom_server']);
 if ($loom_server == '') $loom_server = $default_server;
+if (substr($loom_server, -1) != '/') $loom_server .= '/';
 $buy_loc = htmlspecialchars($_POST['buy_loc']);
 $buy_usage = htmlspecialchars($_POST['buy_usage']);
 $issuer_orig = htmlspecialchars($_POST['issuer_orig']);
@@ -16,6 +21,9 @@ $move_qty = htmlspecialchars($_POST['move_qty']);
 $move_orig = htmlspecialchars($_POST['move_orig']);
 $move_dest = htmlspecialchars($_POST['move_dest']);
 $content = htmlspecialchars($_POST['content']);
+$id = htmlspecialchars($_POST['id']);
+$passphrase = htmlspecialchars($_POST['passphrase']);
+$idhash = htmlspecialchars($_POST['idhash']);
 
 function maybe_echo_server($q) {
   global $loom_server, $default_server;
@@ -71,14 +79,15 @@ A.name_dot { font-size:14pt; font-weight:bold; color:green; }
 -->
 This is a PHP translation of the Loom.cc
 <?php
-if ($page != 'archive') {
-  echo '<a href="https://loom.cc/?function=grid_tutorial&mode=advanced">grid';
+if ($page == 'grid') {
+  echo '<a href="https://loom.cc/?function=grid_tutorial&mode=advanced">grid tutorial</a>.';
+ } elseif ($page == 'archive') {
+   echo '<a href="https://loom.cc/?function=archive_tutorial&mode=advanced">archive tutorial</a>.';
  } else {
-  echo '<a href="https://loom.cc/?function=archive_tutorial&mode=advanced">archive';
+  echo 'Tools page (login required).';
  }
-  
 ?>
- tutorial</a>. I recommend that you avoid entering any real locations you care about on this page, since you'll be sending those locations in plain text over the web to my hosting service. The loom.cc calls from LoomClient.php ARE encrypted, though, so if you write your own web interface, and use https for your site, the entire chain to loom.cc will be encrypted.
+ I recommend that you avoid entering any real locations you care about on this page, since you'll be sending those locations in plain text over the web to my hosting service. The loom.cc calls from LoomClient.php ARE encrypted, though, so if you write your own web interface, and use https for your site, the entire chain to loom.cc will be encrypted.
 <p>
 Download source at
 <a href="../loomclient.tar.gz">loomclient.tar.gz</a>
@@ -87,7 +96,7 @@ Download source at
 <a href="index.html">Loom Index</a> |
 <a href="grid-tutorial.php<? maybe_echo_server('?'); ?>">
 <?php
-if ($page != 'archive') {
+if ($page == 'grid') {
   echo '<b>Grid</b>';
  } else echo 'Grid';
 ?>
@@ -98,6 +107,13 @@ if ($page == 'archive') {
   echo '<b>Archive</b>';
  } else echo 'Archive';
 ?>
+</a> |
+<a href="grid-tutorial.php?page=tools<? maybe_echo_server('&'); ?>">
+<?php
+if ($page == 'tools') {
+  echo '<b>Tools</b>';
+ } else echo 'Tools';
+?>
 </a>
 <hr>
 <?php
@@ -106,7 +122,7 @@ if ($page == 'archive') {
 $client = new LoomClient($loom_server);
 $res = '';
 
-if ($page != 'archive') {
+if ($page == 'grid') {
   if ($_POST['buy'] != '') {
     $res = $client->buy($common_type, $buy_loc, $buy_usage, &$url);
   } elseif ($_POST['sell'] != '') {
@@ -122,7 +138,7 @@ if ($page != 'archive') {
   } elseif ($_POST['move_back'] != '') {
     $res = $client->move($common_type, $move_qty, $move_dest, $move_orig, &$url);
   }
-} else {
+} else if ($page == 'archive') {
   if ($_POST['look_archive'] != '') {
     $res = $client->look_archive($look_hash, &$url);
     if ($res != '') $content = htmlspecialchars($res['content']);
@@ -140,10 +156,29 @@ if ($page != 'archive') {
     $res = $client->write_archive($touch_loc, $buy_usage, html_entity_decode($content), &$url);
     if ($res['hash'] != '') $look_hash = $res['hash'];
   }
+} else {
+  if ($_POST['random_id'] != '') {
+    $random = new LoomRandom();
+    $id = $random->random_id();
+    $idhash = '';
+  } elseif ($_POST['id_hash'] != '') {
+    $idhash = $client->sha256($client->hex2bin($id));
+  } elseif ($_POST['random_passphrase'] != '') {
+    require_once "Diceware.php";
+    if (!isset($diceware)) $diceware = new Diceware();
+    $passphrase = $diceware->random_words(5);
+    $id = '';
+    $idhash = '';
+  } elseif ($_POST['hash_passphrase'] != '') {
+    $hash = $client->sha256($passphrase);
+    $id = $client->hash2location($hash);
+    $idhash = '';
+  }
 }
 
-if ($page == 'archive') print_archive();
-else print_grid();
+if ($page == 'grid') print_grid();
+else if ($page == 'archive') print_archive();
+else print_tools();
 
 if ($res != '') {
 echo "<p><b>URL</b><p>$url<p><b>Result (in KV format)</b><p><pre>";
@@ -171,11 +206,6 @@ up in plain text on this screen. The grid API is <a href="https://loom.cc/?funct
 
 <p>
 <form method=post action="grid-tutorial.php" autocomplete=off>
-<div>
-<input type=hidden name="function" value="grid_tutorial">
-<input type=hidden name="mode" value="advanced">
-</div>
-
 <table border=1 cellpadding=10 style='border-collapse:collapse'>
 
 <tr>
@@ -504,6 +534,67 @@ Archive Content:
 
 <?php
 }
+
+function print_tools() {
+  global $loom_server, $id, $passphrase, $idhash;
+?>
+<form method=post action="grid-tutorial.php?page=tools" autocomplete=off>
+<h1> Tools </h1>
+<p>
+
+Here is an assortment of tools which you may occasionally find useful.
+<p>
+On this panel, you may generate a new random identifier or random passphrase.
+You may also compute the "hash" of a passphrase, which converts a passphrase
+into an identifier.  You may enter the passphrase manually if you don't want
+to use a random one.
+
+<table border=0 cellpadding=5 style='border-collapse:collapse'>
+<colgroup>
+<col width=100>
+<col width=600>
+</colgroup>
+
+<tr>
+<td>
+Loom server:
+</td>
+<td>
+<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server; ?>>
+</td>
+</tr>
+
+<tr>
+<td>Hash:</td>
+<td>
+<input type=text name=idhash size=72 value="<? echo $idhash; ?>">
+</td>
+</tr>
+
+<tr>
+<td>Identifier:</td>
+<td>
+<input type=text class=tt name=id size=36 value="<? echo $id; ?>">
+<input type=submit name=random_id value="Random">
+<input type=submit name=id_hash value="Hash">
+</td>
+</tr>
+
+<tr>
+<td>Passphrase:</td>
+<td>
+<input type=text name=passphrase size=50 value="<? echo $passphrase; ?>">
+<input type=submit name=random_passphrase value="Random">
+<input type=submit name=hash_passphrase value="Hash">
+</td>
+</tr>
+</table>
+
+</form>
+
+<?php
+}
+
 
 // Copyright 2008 Bill St. Clair
 //

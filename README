@@ -4,9 +4,10 @@ code should be self-documentating, if you've learned enough about Loom
 to use them.
 
 The PHP library is in the file LoomClient.php. There's an example web
-form that uses it in grid-tutorial.php. Put those two files in a
+form that uses it in grid-tutorial.php. They require the files:
+Diceware.php, LoomRandom.php, and bcbitwise.php. Put those files in a
 source directory for a PHP-enabled web server, and aim a browser at
-grid-tutorial.php, and you'll see it.
+grid-tutorial.php, and you'll see the tutorial.
 
 The Java library is in java/cc/loom/LoomClient.java and as the class
 cc.loom.LoomClient in loom.jar. You can test it from the command line

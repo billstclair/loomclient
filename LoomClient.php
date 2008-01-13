@@ -211,11 +211,21 @@ class LoomClient
     error_reporting($erpt);
   }
 
-  // Return the sha256 hash of a string, encoded as hex
+  // Return the sha256 hash of a string.
+  // The result is encoded as hex.
   function sha256($str) {
-    $ctx = hash_init('sha256');
-    hash_update($ctx, $str);
-    return hash_final($ctx);
+    if (function_exists('hash_init')) {
+      // Modern PHP
+      $ctx = hash_init('sha256');
+      hash_update($ctx, $str);
+      return hash_final($ctx);
+    } else if (function_exists('mhash')) {
+      // Old PHP with mhash compiled in
+      $hash = mhash(MHASH_SHA256, $str);
+      return bin2hex($hash);
+    } else {
+      return "dead beef feed dad";
+    }
   }
 
   // PHP has bin2hex($x). An easier to remember name for pack("H*", $x)

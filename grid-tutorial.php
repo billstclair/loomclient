@@ -2,28 +2,35 @@
 require_once "LoomClient.php";
 require_once "LoomRandom.php";
 require_once "bcbitwise.php";
-//require_once "Diceware.php";
+//require_once "Diceware.php";   // required below only when used (it's big)
 
-$page = htmlspecialchars($_GET['page']);
+function mq($x) {
+  if (get_magic_quotes_gpc()) return stripslashes($x);
+  else return $x;
+}
+
+$page = mq($_GET['page']);
 if ($page == '') $page = 'grid';
-$common_type = htmlspecialchars($_POST['common_type']);
+$common_type = mq($_POST['common_type']);
 $default_server = 'https://loom.cc/';
-$loom_server = htmlspecialchars($_REQUEST['loom_server']);
+$loom_server = mq($_REQUEST['loom_server']);
 if ($loom_server == '') $loom_server = $default_server;
 if (substr($loom_server, -1) != '/') $loom_server .= '/';
-$buy_loc = htmlspecialchars($_POST['buy_loc']);
-$buy_usage = htmlspecialchars($_POST['buy_usage']);
-$issuer_orig = htmlspecialchars($_POST['issuer_orig']);
-$issuer_dest = htmlspecialchars($_POST['issuer_dest']);
-$touch_loc = htmlspecialchars($_POST['touch_loc']);
-$look_hash = htmlspecialchars($_POST['look_hash']);
-$move_qty = htmlspecialchars($_POST['move_qty']);
-$move_orig = htmlspecialchars($_POST['move_orig']);
-$move_dest = htmlspecialchars($_POST['move_dest']);
-$content = htmlspecialchars($_POST['content']);
-$id = htmlspecialchars($_POST['id']);
-$passphrase = htmlspecialchars($_POST['passphrase']);
-$idhash = htmlspecialchars($_POST['idhash']);
+$buy_loc = mq($_POST['buy_loc']);
+$buy_usage = mq($_POST['buy_usage']);
+$issuer_orig = mq($_POST['issuer_orig']);
+$issuer_dest = mq($_POST['issuer_dest']);
+$touch_loc = mq($_POST['touch_loc']);
+$look_hash = mq($_POST['look_hash']);
+$move_qty = mq($_POST['move_qty']);
+$move_orig = mq($_POST['move_orig']);
+$move_dest = mq($_POST['move_dest']);
+$content = mq($_POST['content']);
+$id = mq($_POST['id']);
+$passphrase = mq($_POST['passphrase']);
+$idhash = mq($_POST['idhash']);
+
+echo "passphrase: " . htmlspecialchars($passphrase) . "<br>";
 
 function maybe_echo_server($q) {
   global $loom_server, $default_server;
@@ -195,6 +202,10 @@ echo '</pre>';
 </html>
 
 <?php
+function hsc($text) {
+  return htmlspecialchars($text);
+}
+
 function print_grid() {
   global $common_type, $loom_server, $buy_loc, $buy_usage, $issuer_orig;
   global $issuer_dest, $touch_loc, $look_hash, $move_qty, $move_orig, $move_dest;
@@ -223,7 +234,7 @@ up in plain text on this screen. The grid API is <a href="https://loom.cc/?funct
 Asset Type:
 </td>
 <td>
-<input type=text class=tt name=common_type size=36 value=<? echo($common_type); ?>>
+<input type=text class=tt name=common_type size=36 value=<? echo hsc($common_type); ?>>
 </td>
 </tr>
 
@@ -232,7 +243,7 @@ Asset Type:
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server; ?>>
+<input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 
@@ -266,7 +277,7 @@ Buy location for one usage token, or sell location for refund.
 Location:
 </td>
 <td>
-<input type=text class=tt name=buy_loc size=36 value=<? echo $buy_loc; ?>>
+<input type=text class=tt name=buy_loc size=36 value=<? echo hsc($buy_loc); ?>>
 </td>
 </tr>
 
@@ -276,7 +287,7 @@ Usage location:
 
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 value=<? echo $buy_usage; ?>>
+<input type=text class=tt name=buy_usage size=36 value=<? echo hsc($buy_usage); ?>>
 </td>
 </tr>
 
@@ -310,7 +321,7 @@ Current Issuer:
 </td>
 <td>
 
-<input type=text class=tt name=issuer_orig size=36 value=<? echo $issuer_orig;?>>
+<input type=text class=tt name=issuer_orig size=36 value=<? echo hsc($issuer_orig);?>>
 </td>
 </tr>
 
@@ -319,7 +330,7 @@ Current Issuer:
 New Issuer:
 </td>
 <td>
-<input type=text class=tt name=issuer_dest size=36 value=<? echo $issuer_dest; ?>>
+<input type=text class=tt name=issuer_dest size=36 value=<? echo hsc($issuer_dest); ?>>
 </td>
 </tr>
 
@@ -352,7 +363,7 @@ Touch a location directly to see its value.
 Location:
 </td>
 <td>
-<input type=text class=tt name=touch_loc size=36 value=<? echo $touch_loc; ?>>
+<input type=text class=tt name=touch_loc size=36 value=<? echo hsc($touch_loc); ?>>
 </td>
 </tr>
 
@@ -385,7 +396,7 @@ Look at a location by its hash.
 Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72 value=<? echo $look_hash; ?>>
+<input type=text class=tt name=look_hash size=72 value=<? echo hsc($look_hash); ?>>
 </td>
 </tr>
 
@@ -420,7 +431,7 @@ Move units from one location to another.
 Quantity:
 </td>
 <td>
-<input type=text class=tt name=move_qty size=45 value=<? echo $move_qty; ?>>
+<input type=text class=tt name=move_qty size=45 value=<? echo hsc($move_qty); ?>>
 </td>
 </tr>
 
@@ -429,7 +440,7 @@ Quantity:
 Origin:
 </td>
 <td>
-<input type=text class=tt name=move_orig size=36 value=<? echo $move_orig; ?>>
+<input type=text class=tt name=move_orig size=36 value=<? echo hsc($move_orig); ?>>
 </td>
 </tr>
 
@@ -438,7 +449,7 @@ Origin:
 Destination:
 </td>
 <td>
-<input type=text class=tt name=move_dest size=36 value=<? echo $move_dest; ?>>
+<input type=text class=tt name=move_dest size=36 value=<? echo hsc($move_dest); ?>>
 </td>
 </tr>
 
@@ -475,7 +486,7 @@ It also serves as a tutorial, showing you the API url and result.
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server ?>>
+<input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 <tr>
@@ -483,7 +494,7 @@ Loom server:
 Archive Hash:
 </td>
 <td>
-<input type=text class=tt name=look_hash size=72 value=<? echo $look_hash; ?>>
+<input type=text class=tt name=look_hash size=72 value=<? echo hsc($look_hash); ?>>
 <input type=submit name=look_archive value="Look">
 </td>
 </tr>
@@ -494,7 +505,7 @@ Archive Location:
 </td>
 <td>
 
-<input type=text class=tt name=touch_loc size=36 value=<? echo $touch_loc; ?>>
+<input type=text class=tt name=touch_loc size=36 value=<? echo hsc($touch_loc); ?>>
 <input type=submit name=touch_archive value="Touch">
 <input type=submit name=buy_archive value="Buy">
 <input type=submit name=sell_archive value="Sell">
@@ -507,7 +518,7 @@ Archive Location:
 Usage Location:
 </td>
 <td>
-<input type=text class=tt name=buy_usage size=36 value=<? echo $buy_usage; ?>>
+<input type=text class=tt name=buy_usage size=36 value=<? echo hsc($buy_usage); ?>>
 </td>
 </tr>
 
@@ -516,7 +527,7 @@ Usage Location:
 Archive Content:
 </td>
 <td>
-<a href="<? echo $loom_server; ?>?function=view&hash=<? echo $look_hash; ?>" title="View as web page">View</a>
+<a href="<? echo hsc($loom_server); ?>?function=view&hash=<? echo hsc($look_hash); ?>" title="View as web page">View</a>
 <input type=submit name=write_archive value="Write">
 
 </td>
@@ -524,7 +535,7 @@ Archive Content:
 <tr>
 <td colspan=2>
 <textarea name=content rows=20 cols=120>
-<? echo $content; ?>
+<? echo hsc($content); ?>
 </textarea>
 </td>
 </tr>
@@ -560,21 +571,21 @@ to use a random one.
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<? echo $loom_server; ?>>
+  <input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 
 <tr>
 <td>Hash:</td>
 <td>
-<input type=text name=idhash size=72 value="<? echo $idhash; ?>">
+<input type=text name=idhash size=72 value="<? echo hsc($idhash); ?>">
 </td>
 </tr>
 
 <tr>
 <td>Identifier:</td>
 <td>
-<input type=text class=tt name=id size=36 value="<? echo $id; ?>">
+<input type=text class=tt name=id size=36 value="<? echo hsc($id); ?>">
 <input type=submit name=random_id value="Random">
 <input type=submit name=id_hash value="Hash">
 </td>
@@ -583,7 +594,7 @@ Loom server:
 <tr>
 <td>Passphrase:</td>
 <td>
-<input type=text name=passphrase size=50 value="<? echo $passphrase; ?>">
+<input type=text name=passphrase size=50 value="<? echo hsc($passphrase); ?>">
 <input type=submit name=random_passphrase value="Random">
 <input type=submit name=hash_passphrase value="Hash">
 </td>

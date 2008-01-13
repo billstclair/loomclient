@@ -30,8 +30,6 @@ $id = mq($_POST['id']);
 $passphrase = mq($_POST['passphrase']);
 $idhash = mq($_POST['idhash']);
 
-echo "passphrase: " . htmlspecialchars($passphrase) . "<br>";
-
 function maybe_echo_server($q) {
   global $loom_server, $default_server;
   if ($loom_server != $default_server) {
@@ -168,6 +166,7 @@ if ($page == 'grid') {
     $random = new LoomRandom();
     $id = $random->random_id();
     $idhash = '';
+    $passphrase = '';
   } elseif ($_POST['id_hash'] != '') {
     $idhash = $client->sha256($client->hex2bin($id));
   } elseif ($_POST['random_passphrase'] != '') {

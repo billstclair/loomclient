@@ -64,7 +64,7 @@ function bcdechex($num)
   return $res;
 }
 
-// Convert hex to decimal (link PHP's builtin hexdec)
+// Convert hex to decimal (like PHP's builtin hexdec)
 
 function bchexdec($hex) {
   $res = 0;

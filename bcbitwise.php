@@ -64,6 +64,12 @@ function bcdechex($num)
   return $res;
 }
 
+function bcashex($operation, $x, $y) {
+  $x = bchexdec($x);
+  $y = bchexdec($y);
+  return bcdechex($operation($x, $y));
+}
+
 // Convert hex to decimal (like PHP's builtin hexdec)
 
 function bchexdec($hex) {

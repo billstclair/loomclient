@@ -242,7 +242,7 @@ Asset Type:
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
+<input type=text name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 
@@ -485,7 +485,7 @@ It also serves as a tutorial, showing you the API url and result.
 Loom server:
 </td>
 <td>
-<input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
+<input type=text name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 <tr>
@@ -570,14 +570,14 @@ to use a random one.
 Loom server:
 </td>
 <td>
-  <input type=text class=tt name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
+  <input type=text name=loom_server size=50 value=<? echo hsc($loom_server); ?>>
 </td>
 </tr>
 
 <tr>
 <td>Hash:</td>
 <td>
-<input type=text name=idhash size=72 value="<? echo hsc($idhash); ?>">
+<input type=text class=tt name=idhash size=72 value="<? echo hsc($idhash); ?>">
 </td>
 </tr>
 

@@ -64,12 +64,6 @@ function bcdechex($num)
   return $res;
 }
 
-function bcashex($operation, $x, $y) {
-  $x = bchexdec($x);
-  $y = bchexdec($y);
-  return bcdechex($operation($x, $y));
-}
-
 // Convert hex to decimal (like PHP's builtin hexdec)
 
 function bchexdec($hex) {
@@ -78,6 +72,52 @@ function bchexdec($hex) {
     $res = bcadd(bcleftshift($res, 4), hexdec($hex[$i]));
   }
   return $res;
+}
+
+// Convert args from hex and result to hex of a bcxxx operation.
+
+function bcashex($operation, $x, $y) {
+  $x = bchexdec($x);
+  $y = bchexdec($y);
+  return bcdechex($operation($x, $y));
+}
+
+// Hex version of all the operators
+
+function bcandhex($x, $y) {
+  return bcashex('bcand', $x, $y);
+}
+
+function bcorhex($x, $y) {
+  return bcashex('bcor', $x, $y);
+}
+
+function bcxorhex($x, $y) {
+  return bcashex('bcxor', $x, $y);
+}
+
+function bcleftshifthex($x, $y) {
+  return bcashex('bcleftshift', $x, $y);
+}
+
+function bcrightshifthex($x, $y) {
+  return bcashex('bcrightshift', $x, $y);
+}
+
+function bcaddhex($x, $y) {
+  return bcashex('bcadd', $x, $y);
+}
+
+function bcsubhex($x, $y) {
+  return bcashex('bcsub', $x, $y);
+}
+
+function bcmulhex($x, $y) {
+  return bcashex('bcmul', $x, $y);
+}
+
+function bcdivhex($x, $y) {
+  return bcashex('bcdiv', $x, $y);
 }
 
 

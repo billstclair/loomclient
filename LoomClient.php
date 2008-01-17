@@ -212,20 +212,26 @@ class LoomClient
   }
 
   // Return the sha256 hash of a string.
-  // The result is encoded as hex.
+  // The result is encoded as hex, and guaranteed to be 64 charaacters,
+  // with leading zeroes added, if necessary.
   function sha256($str) {
     if (function_exists('hash_init')) {
       // Modern PHP
       $ctx = hash_init('sha256');
       hash_update($ctx, $str);
-      return hash_final($ctx);
+      $hash = hash_final($ctx);
     } else if (function_exists('mhash')) {
       // Old PHP with mhash compiled in
-      $hash = mhash(MHASH_SHA256, $str);
-      return bin2hex($hash);
+      $hash = bin2hex(mhash(MHASH_SHA256, $str));
     } else {
-      return "dead beef feed dad";
+      // Not a hash, really, but the best we can do
+      $hash = bin2hex($str);
+      if (strlen($hash) > 32) $hash = substr($hash, 1, 32);
     }
+    if (strlen($hash) < 32) {
+      $hash = str_repeat(32 - strlen($hash)) . $hash;
+    }
+    return $hash;
   }
 
   // PHP has bin2hex($x). An easier to remember name for pack("H*", $x)

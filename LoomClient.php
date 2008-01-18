@@ -50,12 +50,8 @@ class LoomClient
     $uri = $this->url('', $keys);
     $url = $this->url_prefix . $uri;
     $uri = '/' . $uri;
-    // Kluge around protocol warning
-    // I really want try/finally here, but PHP doesn't have it
-    //$erpt = $this->disable_warnings();
     $this->socket->get($uri);
     $kv = $this->socket->body;
-    //$this->reenable_warnings($erpt);
     return $this->parsekv($kv);
   }
 

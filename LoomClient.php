@@ -1,5 +1,6 @@
 <?php
 require_once "bcbitwise.php";
+require_once "Socket.php";
 
 /*
  * Client to the webapp at http://loom.cc/
@@ -10,15 +11,18 @@ class LoomClient
 {
   var $url_prefix;              // Who you gonna call?
   var $bits128;                 // 128 1-bits = 2**128 - 1
+  var $socket;
 
   function LoomClient($prefix = 'https://loom.cc/') {
     if (substr($prefix, -1) != '/') $prefix .= '/';
     $this->url_prefix = $prefix;
     $this->bits128  = bcsub(bcleftshift(1, 128), 1);
+    $this->socket = FALSE;
   }
 
   // This is all you really need to call
   // The functions below are just syntactic sugar for calling get()
+  /* Save the old non-persistent connection version
   function get($keys, &$url) {
     $url = $this->url($this->url_prefix, $keys);
     // Kluge around protocol warning
@@ -28,6 +32,33 @@ class LoomClient
     $this->reenable_warnings($erpt);
     return $this->parsekv($kv);
   }
+  */
+
+  function get($keys, &$url) {
+    if (!$this->socket) {
+      // Should make this less brittle
+      if (substr($this->url_prefix, 0, 5) == 'https') {
+        $host = substr($this->url_prefix, 8, strlen($url_prefix)-1);
+        $ssl = TRUE;
+      } else {
+        $host = substr($this->url_prefix, 7, strlen($url_prefix)-1);
+        $ssl = FALSE;
+      }
+      $this->socket = new Socket($host, $ssl);
+      $this->socket->connect();
+    }
+    $uri = $this->url('', $keys);
+    $url = $this->url_prefix . $uri;
+    $uri = '/' . $uri;
+    // Kluge around protocol warning
+    // I really want try/finally here, but PHP doesn't have it
+    //$erpt = $this->disable_warnings();
+    $this->socket->get($uri);
+    $kv = $this->socket->body;
+    //$this->reenable_warnings($erpt);
+    return $this->parsekv($kv);
+  }
+
 
   function buy($type, $location, $usage, &$url) {
     return $this->get(array('function' => 'grid',

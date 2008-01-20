@@ -302,6 +302,7 @@ function parseFolder($location, $folder) {
 }
 
 function applyScale($value, $min_precision, $scale) {
+  if ($value < 0) $value++;
   if ($scale > 0) $value = bcdiv($value, bcpow(10, $scale, 0), $scale);
 
   $dotpos = strpos($value, '.');

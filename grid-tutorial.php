@@ -92,7 +92,7 @@ if ($page == 'grid') {
   echo 'Tools page (login required).';
  }
 ?>
- I recommend that you avoid entering any real locations you care about on this page, since you'll be sending those locations in plain text over the web to my hosting service. The loom.cc calls from LoomClient.php ARE encrypted, though, so if you write your own web interface, and use https for your site, the entire chain to loom.cc will be encrypted.
+Note that if you enter any real locations containing valuable assets in this page, those locations are being transferred through my web site to loom.cc. All trasmissions are encrypted, so it's unlikely that anybody can steal your valuable information en-route, but you ARE trusting me to not snarf your locations with my PHP code. I promise that unless somebody hacks my site, the code that is running is the code I've posted at the link below, which does NOT save your information anywhere, just passes it on to loom.cc. But if you don't trust me, don't give away anything important.
 <p>
 Download source at
 <a href="../loomclient.tar.gz">loomclient.tar.gz</a>
@@ -128,20 +128,32 @@ $client = new LoomClient($loom_server);
 $res = '';
 
 if ($page == 'grid') {
+  $buy_message = '';
+  $issuer_message = '';
+  $touch_message = '';
+  $look_message = '';
+  $move_message = '';
   if ($_POST['buy'] != '') {
     $res = $client->buy($common_type, $buy_loc, $buy_usage, &$url);
+    checkResult($res, 'usage_balance', 'error_loc', &$buy_message);
   } elseif ($_POST['sell'] != '') {
     $res = $client->sell($common_type, $buy_loc, $buy_usage, &$url);
+    checkResult($res, 'usage_balance', 'error_loc', &$buy_message);
   } elseif ($_POST['issuer'] != '') {
     $res = $client->issuer($common_type, $issuer_orig, $issuer_dest, &$url);
+    checkResult($res, 'status', 'status', &$issuer_message);
   } elseif ($_POST['touch'] != '') {
     $res = $client->touch($common_type, $touch_loc, &$url);
+    checkResult($res, 'value', 'error_loc', &$touch_message);
   } elseif ($_POST['look'] != '') {
     $res = $client->look($common_type, $look_hash, &$url);
+    checkResult($res, 'value', 'error_loc', &$look_message);
   } elseif ($_POST['move'] != '') {
     $res = $client->move($common_type, $move_qty, $move_orig, $move_dest, &$url);
+    checkResult($res, 'value_dest', 'error_qty', &$move_message);
   } elseif ($_POST['move_back'] != '') {
     $res = $client->move($common_type, $move_qty, $move_dest, $move_orig, &$url);
+    checkResult($res, 'value_orig', 'error_qty', &$move_message);
   }
 } else if ($page == 'archive') {
   if ($_POST['look_archive'] != '') {
@@ -201,6 +213,14 @@ echo '</pre>';
 </html>
 
 <?php
+
+function checkResult($res, $success_key, $fail_key, &$var) {
+  $status = $res['status'];
+  if ($status == 'success') $var = $res[$success_key];
+  else $var = $res[$fail_key];
+  if ($var == '') $var = $status;
+}
+
 function hsc($text) {
   return htmlspecialchars($text);
 }
@@ -208,6 +228,8 @@ function hsc($text) {
 function print_grid() {
   global $common_type, $loom_server, $buy_loc, $buy_usage, $issuer_orig;
   global $issuer_dest, $touch_loc, $look_hash, $move_qty, $move_orig, $move_dest;
+  global $buy_message, $issuer_message, $touch_message, $look_message, $move_message;
+
 ?>
 <p>
 This is an interactive tutorial to help you set up and test grid operations.
@@ -277,6 +299,7 @@ Location:
 </td>
 <td>
 <input type=text class=tt name=buy_loc size=36 value=<? echo hsc($buy_loc); ?>>
+<? echo $buy_message; ?>
 </td>
 </tr>
 
@@ -321,6 +344,7 @@ Current Issuer:
 <td>
 
 <input type=text class=tt name=issuer_orig size=36 value=<? echo hsc($issuer_orig);?>>
+<? echo $issuer_message; ?>
 </td>
 </tr>
 
@@ -363,6 +387,7 @@ Location:
 </td>
 <td>
 <input type=text class=tt name=touch_loc size=36 value=<? echo hsc($touch_loc); ?>>
+<? echo $touch_message; ?>
 </td>
 </tr>
 
@@ -396,6 +421,7 @@ Hash:
 </td>
 <td>
 <input type=text class=tt name=look_hash size=72 value=<? echo hsc($look_hash); ?>>
+<? echo $look_message; ?>
 </td>
 </tr>
 
@@ -449,6 +475,7 @@ Destination:
 </td>
 <td>
 <input type=text class=tt name=move_dest size=36 value=<? echo hsc($move_dest); ?>>
+<? echo $move_message; ?>
 </td>
 </tr>
 

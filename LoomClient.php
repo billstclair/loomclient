@@ -38,10 +38,10 @@ class LoomClient
     if (!$this->socket) {
       // Should make this less brittle
       if (substr($this->url_prefix, 0, 5) == 'https') {
-        $host = substr($this->url_prefix, 8, strlen($url_prefix)-1);
+        $host = substr($this->url_prefix, 8, -1);
         $ssl = TRUE;
       } else {
-        $host = substr($this->url_prefix, 7, strlen($url_prefix)-1);
+        $host = substr($this->url_prefix, 7, -1);
         $ssl = FALSE;
       }
       $this->socket = new Socket($host, $ssl);
@@ -158,22 +158,53 @@ class LoomClient
     return $str;
   }
 
-  function parsekv($kv) {
+  function parsekv($kv, $recursive=FALSE) {
     $lines = explode("\n", $kv);
     $first = true;
     $res = array();
+    $stackptr = 0;
+    $stack = array();
     foreach ($lines as $line) {
+      $line = trim($line);
+      //echo "$line<br>\n";
       if ($first && ($line != '(')) {
         return $res;           // Could throw exception in PHP 5
       }
       $first = false;
-      if ($line == ')') return $res;
-      if (substr($line, 0, 1) == ':') $key = substr($line, 1);
-      if (substr($line, 0, 1) == '=') {
-        $value = $this->unquote_cstring(substr($line, 1));
-        $res[$key] = $value;
+      if ($line == ')') {
+        if (!$recursive || $stackptr == 0) return $res;
+        $child = $res;
+        $res = $stack[--$stackptr];
+        $key = $stack[--$stackptr];
+        $res[$key] = $child;
+        //echo "popped: $stackptr<pre>\n"; print_r($res); echo "</pre>\n";
+      } else {
+        if (substr($line, 0, 1) == ':') $key = substr($line, 1);
+        elseif (substr($line, 0, 1) == '=') {
+          $value = substr($line, 1);
+          if ($recursive && $value == "(") {
+            $child = array();
+            $stack[$stackptr++] = $key;
+            $stack[$stackptr++] = $res;
+            //echo "pushed: $stackptr<br>\n";
+            $res = $child;
+          } else {        
+            $value = $this->unquote_cstring($value);
+            $res[$key] = $value;
+          }
+        }
       }
     }
+  }
+
+  function array2kv($array, $res="(\n") {
+    foreach ($array as $key => $value) {
+      $res .= ":$key\n";
+      if (is_array($value)) $res = $this->array2kv($value, $res . "=(\n");
+      else $res .= "=" . $this->quote_cstring($value) . "\n";
+    }
+    $res .= ")\n";
+    return $res;
   }
 
   function quote_cstring($cstring) {

@@ -94,6 +94,8 @@ A.name_dot { font-size:14pt; font-weight:bold; color:green; }
 
 </head>
 <body onload="document.forms[0].<? echo $onload; ?>.focus()">
+<table width="320px">
+<tr><td>
 <?
 
 if ($page == 'main') doMain();
@@ -101,7 +103,9 @@ if ($page == 'main') doMain();
 if ($page == 'login') drawLogin();
 elseif ($page == 'main') drawMain();
 
-?></body>
+?></td></tr>
+</table>
+</body>
 </html>
 <?
 
@@ -165,7 +169,7 @@ site, the code running is what you can download from
 <a href="index.html">here</a>, but don't trust that unless you know
 me.</p>
 <form method="post" action="" autocomplete="off">
-<table width="320px">
+<table width="99%">
 <tr>
 <td>Passphrase:</td>
 <td><input type="password" name="passphrase" size="35" /></td>

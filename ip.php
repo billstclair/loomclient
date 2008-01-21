@@ -34,8 +34,13 @@ $folder = '';
 $values = '';
 $message = '';
 
-if ($folderkv != '') $folder = $client->parsekv($folderkv, TRUE);
-if ($valueskv != '') $values = $client->parsekv($valueskv, TRUE);
+if ($refresh != '') {
+   $folderkv = '';
+   $valueskv = '';
+} else {
+  if ($folderkv != '') $folder = $client->parsekv($folderkv, TRUE);
+  if ($valueskv != '') $values = $client->parsekv($valueskv, TRUE);
+}
 
 if ($passphrase == '' || !login()) {
   $onload = 'passphrase';
@@ -283,7 +288,6 @@ foreach($values as $loc => $value) {
 <td>
 <input style="font-size: 10pt;" type="submit" name="take" value="Take"/>
 <input style="font-size: 10pt;" type="submit" name="give" value="Give"/>
-<!--<input type="submit" name="refresh" value="Refresh"/>-->
 </td>
 </tr>
 <?

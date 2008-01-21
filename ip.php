@@ -24,6 +24,7 @@ $folderkv = mq($_POST['folderkv']);
 $valueskv = mq($_POST['valueskv']);
 $take = mq($_POST['take']);
 $give = mq($_POST['give']);
+$refresh = mq($_POST['refresh']);
 
 $client = new LoomClient();
 
@@ -48,6 +49,49 @@ if ($passphrase == '' || !login()) {
 <head>
 <meta name="viewport" content="width=device-width" user-scalable="no" minimum-scale="1.0" maximum-scale="1.0"/>
 <title>Loom Folder</title>
+
+<script language="JavaScript">
+function refreshMain() {
+  document.forms["mainform"].refresh.value = "refresh";
+  document.mainform.submit();
+}
+</script>
+
+<style type="text/css">
+body { font-family: verdana, arial, sans-serif; font-size: 12pt }
+div { font-size:12pt }
+p { font-size:12pt }
+h1 { font-size:14pt }
+h2 { font-size:12pt }
+h3 { font-size:10pt }
+td { font-size:12pt }
+ul { font-size:12pt }
+li { padding-bottom: 7px }
+pre { font-family: verdana, arial, sans-serif; }
+A:link, A:visited { color:blue; text-decoration:none }
+A:hover { color:blue; text-decoration:underline }
+A:active { color:#FAD805; text-decoration:underline }
+.tt { font-family: Courier; font-size:10pt }
+.mono { font-family: monospace; font-size: 8pt }
+.large_mono { font-family: monospace; font-size: 10pt }
+.giant_mono { font-family: monospace; font-size: 14pt }
+.tiny_mono { font-family: monospace; font-size: 6pt }
+.normal { font-size:10pt }
+.smaller { font-size:6pt }
+.small { font-size:8pt }
+.large { font-size:12pt }
+.alarm { color:red }
+.focus_value { background-color:#DDDDDD }
+.color_heading { margin-top:12px; padding:1px; background-color:#DDDDDD; width:100% }
+A.label_link { font-weight:bold; }
+A.highlight_link { font-weight:bold; }
+A.cancel { background-color:#FFDDDD }
+A.plain:link, A.plain:visited { color:black; text-decoration:none }
+A.plain:hover { color:blue; text-decoration:underline }
+A.plain:active { color:#FAD805; text-decoration:underline }
+A.name_dot { font-size:14pt; font-weight:bold; color:green; }
+</style>
+
 </head>
 <body onload="document.forms[0].<? echo $onload; ?>.focus()">
 <?
@@ -172,24 +216,38 @@ function drawValues($name, $typevalues) {
 function drawMain() {
   global $passphrase, $folder, $values, $folder_name;
   global $qty, $type, $location;
-  global $message;
+  global $message, $refresh;
 
+  $refresh = '';
+
+?>
+<table border="0" width="99%" cellpadding="3">
+<tr>
+<td colspan="2" style="background-color: #c0c0c0;"><center><span style="font-weight: bold; font-size: 110%;"><a href="javascript:refreshMain();">Refresh</a>
+&nbsp;
+Locations
+&nbsp;
+Types</span></center></td>
+</tr>
+</table>
+<?
   drawValues($folder_name, $values[$folder_name]);
 ?>
-<form method="post" action="" autocomplete="off">
+<table border="0" width="99%">
+<form name="mainform" method="post" action="" autocomplete="off">
 <?
 hiddenValue('passphrase'); echo "\n";
 hiddenValue('folderkv'); echo "\n";
 hiddenValue('valueskv');
+hiddenValue('refresh');
 ?>
-<table border="0" width="320px">
 <tr>
 <td align="right">Qty:</td>
-<td><input type="text" size="15" name="zip" value="<? echo $qty; ?>" style="text-align:right;"></td>
+<td><input style="font-size: 10pt;" type="text" size="25" name="zip" value="<? echo $qty; ?>" style="text-align:right;"></td>
 </tr><tr>
 <td></td>
 <td>
-<select name="type">
+<select name="type" style="font-size: 10pt;">
 <option value="">-- choose asset --</option>
 <?
 foreach ($folder['types'] as $typename => $typearray) {
@@ -203,7 +261,7 @@ foreach ($folder['types'] as $typename => $typearray) {
 </tr><tr>
 <td></td>
 <td>
-<select name="location">
+<select name="location" style="font-size: 10pt;">
 <option value="">-- choose location --</option>
 <?
 foreach($values as $loc => $value) {
@@ -219,9 +277,9 @@ foreach($values as $loc => $value) {
 </tr><tr>
 <td></td>
 <td>
-<input type="submit" name="take" value="Take"/>
-<input type="submit" name="give" value="Give"/>
-<input type="submit" name="refresh" value="Refresh"/>
+<input style="font-size: 10pt;" type="submit" name="take" value="Take"/>
+<input style="font-size: 10pt;" type="submit" name="give" value="Give"/>
+<!--<input type="submit" name="refresh" value="Refresh"/>-->
 </td>
 </tr>
 <?

@@ -223,11 +223,11 @@ function drawMain() {
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
-<td colspan="2" style="background-color: #c0c0c0;"><center><span style="font-weight: bold; font-size: 110%;"><a href="javascript:refreshMain();">Refresh</a>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:refreshMain();">Refresh</a>
 &nbsp;
 Locations
 &nbsp;
-Types</span></center></td>
+Types</span></td>
 </tr>
 </table>
 <?

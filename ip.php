@@ -24,19 +24,21 @@ $folderkv = mq($_POST['folderkv']);
 $valueskv = mq($_POST['valueskv']);
 $take = mq($_POST['take']);
 $give = mq($_POST['give']);
-$refresh = mq($_POST['refresh']);
+$page = mq($_POST['page']);
+$greendot = mq($_POST['greendot']);
+$showfolder = mq($_POST['showfolder']);
 
 $client = new LoomClient();
 
 $onload = 'qty';
-$page = 'main';
 $folder = '';
 $values = '';
 $message = '';
 
-if ($refresh != '') {
+if ($page == 'refresh') {
    $folderkv = '';
    $valueskv = '';
+   $page = 'main';
 } else {
   if ($folderkv != '') $folder = $client->parsekv($folderkv, TRUE);
   if ($valueskv != '') $values = $client->parsekv($valueskv, TRUE);
@@ -45,9 +47,11 @@ if ($refresh != '') {
 if ($passphrase == '' || !login()) {
   $onload = 'passphrase';
   $page = 'login';
-} else if ($values == '') {
-  $values = scanFolder($folder);
-  $valueskv = $client->array2kv($values);
+} else {
+   if ($values == '') {
+    $values = scanFolder($folder);
+    $valueskv = $client->array2kv($values);
+  }
 }
 
 ?><html>
@@ -56,8 +60,13 @@ if ($passphrase == '' || !login()) {
 <title>Loom Folder</title>
 
 <script language="JavaScript">
-function refreshMain() {
-  document.forms["mainform"].refresh.value = "refresh";
+function submitPage(page) {
+  document.forms["mainform"].page.value = page;
+  document.mainform.submit();
+}
+
+function greenDot(greendot) {
+  document.forms["mainform"].greendot.value = greendot;
   document.mainform.submit();
 }
 </script>
@@ -77,7 +86,7 @@ A:link, A:visited { color:blue; text-decoration:none }
 A:hover { color:blue; text-decoration:underline }
 A:active { color:#FAD805; text-decoration:underline }
 .tt { font-family: Courier; font-size:10pt }
-.mono { font-family: monospace; font-size: 8pt }
+.mono { font-family: monospace; font-size: 11pt }
 .large_mono { font-family: monospace; font-size: 10pt }
 .giant_mono { font-family: monospace; font-size: 14pt }
 .tiny_mono { font-family: monospace; font-size: 6pt }
@@ -94,7 +103,7 @@ A.cancel { background-color:#FFDDDD }
 A.plain:link, A.plain:visited { color:black; text-decoration:none }
 A.plain:hover { color:blue; text-decoration:underline }
 A.plain:active { color:#FAD805; text-decoration:underline }
-A.name_dot { font-size:14pt; font-weight:bold; color:green; }
+A.name_dot { font-size:16pt; font-weight:bold; color:green; }
 </style>
 
 </head>
@@ -104,9 +113,11 @@ A.name_dot { font-size:14pt; font-weight:bold; color:green; }
 <?
 
 if ($page == 'main') doMain();
+elseif ($page == 'locations') doLocations();
 
 if ($page == 'login') drawLogin();
 elseif ($page == 'main') drawMain();
+elseif ($page == 'locations') drawLocations();
 
 ?></td></tr>
 </table>
@@ -164,6 +175,9 @@ function doMain() {
   }
 }
 
+function doLocations() {
+}
+
 function drawLogin() {
 
 ?>
@@ -174,6 +188,7 @@ site, the code running is what you can download from
 <a href="index.html">here</a>, but don't trust that unless you know
 me.</p>
 <form method="post" action="" autocomplete="off">
+<input type="hidden" name="page" value="main"/>
 <table width="99%">
 <tr>
 <td>Passphrase:</td>
@@ -225,16 +240,16 @@ function drawValues($name, $typevalues) {
 function drawMain() {
   global $passphrase, $folder, $values, $folder_name;
   global $qty, $type, $location;
-  global $message, $refresh;
+  global $message;
 
-  $refresh = '';
+  $page = 'main';
 
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
-<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:refreshMain();">Refresh</a>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
-Locations
+<a href="javascript:submitPage('locations');">Locations</a>
 &nbsp;
 Types</span></td>
 </tr>
@@ -248,11 +263,11 @@ Types</span></td>
 hiddenValue('passphrase'); echo "\n";
 hiddenValue('folderkv'); echo "\n";
 hiddenValue('valueskv');
-hiddenValue('refresh');
+hiddenValue('page');
 ?>
 <tr>
 <td align="right">Qty:</td>
-<td><input style="font-size: 10pt;" type="text" size="25" name="zip" value="<? echo $qty; ?>" style="text-align:right;"></td>
+<td><input style="font-size: 12pt;" type="text" size="25" name="zip" value="<? echo $qty; ?>" style="text-align:right;"></td>
 </tr><tr>
 <td></td>
 <td>
@@ -303,6 +318,74 @@ foreach($values as $loc => $value) {
     }
   }
 ?>
+<?
+}
+
+function drawLocations() {
+  global $passphrase, $folder, $values, $folder_name;
+  global $qty, $type, $location, $greendot;
+  global $message;
+
+  $page = 'locations';
+  $zip = $qty;
+?>
+<table border="0" width="99%" cellpadding="3">
+<tr>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
+&nbsp;
+Locations
+&nbsp;
+Types</span></td>
+</tr>
+</table>
+<table border="0" width="99%">
+<form name="mainform" method="post" action="" autocomplete="off">
+<?
+  hiddenValue('passphrase'); echo "\n";
+  hiddenValue('folderkv'); echo "\n";
+  hiddenValue('valueskv');
+  hiddenValue('zip');
+  hiddenValue('type');
+  hiddenValue('location');
+  hiddenValue('page');
+?>
+<input type="hidden" name="greendot" value=""/>
+<table>
+<tr>
+<td><a class=name_dot href="javascript: greenDot('<? echo $folder_name; ?>')" title="Edit Name">&bull;</a></td>
+<?
+  echo "<td>";
+  if ($greendot != $folder_name) echo "<b>$folder_name</b>";
+  else {
+    echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . $folder_name . '"/><br/>' . "\n";
+    echo '<input type="submit" name="savename" value="Save"/>';
+    echo '<input type="submit" name="cancel" value="Cancel"/>';
+  }
+  echo "</td></tr>\n";
+  $locs = $folder['locs'];
+  foreach ($locs as $name => $loc) {
+    if ($name != $folder_name) {
+?>
+<tr>
+<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $name; ?>')" title="Edit Name or Delete Folder">&bull;</a></td>
+<?
+      echo "<td>";
+      if ($greendot != $name) echo $name;
+      else {
+        echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . $name . '"/><br/>' . "\n";
+        echo '<input type="submit" name="savename" value="Save"/>';
+        echo '<input type="submit" name="cancel" value="Cancel"/>';
+        echo "&nbsp;&nbsp;";
+        echo '<input type="submit" name="delete" value="Delete..."/><br/>';
+        echo '</td></tr><tr><td colspan="2"><span class="mono">' . "<b>$loc</b></span><br/>\n";
+      }
+      echo "</td></tr>\n";
+    }
+  }
+?><tr><td colspan="2"><input type="submit" name="add_location" value="Add Location"/></td></tr>
+</table>
+
+<p>Click the green dot by a folder name to see its hex value, or to rename or delete it.</p>
 <?
 }
 

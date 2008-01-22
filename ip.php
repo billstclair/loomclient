@@ -327,7 +327,6 @@ function drawLocations() {
   global $message;
 
   $page = 'locations';
-  $zip = $qty;
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
@@ -344,7 +343,7 @@ Types</span></td>
   hiddenValue('passphrase'); echo "\n";
   hiddenValue('folderkv'); echo "\n";
   hiddenValue('valueskv');
-  hiddenValue('zip');
+  echo '<input type="hidden" name="zip" value="' . $qty . '"/>' . "\n";
   hiddenValue('type');
   hiddenValue('location');
   hiddenValue('page');

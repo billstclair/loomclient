@@ -27,7 +27,9 @@ class LoomRandom {
 
   // Return a random 128-bit location, as hex
   function random_id() {
-    return bin2hex($this->urandom_bytes(16));
+    $res = bin2hex($this->urandom_bytes(16));
+    if (strlen($res) < 32) $res = str_repeat("0", 32 - strlen($res)) . $res;
+    return $res;
   }
 
 }

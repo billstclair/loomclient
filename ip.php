@@ -176,6 +176,9 @@ function doMain() {
 }
 
 function doLocations() {
+  // https://loom.cc/?function=folder_locations&session=42fabf3a06e44e598a3b09767dd05f34&old_name=BillStClair&new_name=Bill+St.+Clair&save=Save
+  // Need to investigate how to delete.
+  // The "session" is an archive location containing the folder location
 }
 
 function drawLogin() {

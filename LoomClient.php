@@ -201,6 +201,7 @@ class LoomClient
 
   // Convert our array() representation of the folder
   // into the string to write into the archive
+  // Not used. We let Loom itself munge the folder string.
   function folderArchiveString($folder) {
     $res = "Content-type: loom/folder\n\n(\n";
     $types = "";
@@ -235,6 +236,13 @@ class LoomClient
     $res .= ")\n";
 
     return $res;
+  }
+
+  // Return the session associated with a folder location
+  // Create a new session if one doesn't already exist,
+  // buying the location to store it as necessary.
+  function folderSession($folder_location) {
+    
   }
 
   function parsekv($kv, $recursive=FALSE) {
@@ -363,12 +371,9 @@ class LoomClient
     } else {
       // Not a hash, really, but the best we can do
       $hash = bin2hex($str);
-      if (strlen($hash) > 32) $hash = substr($hash, 1, 32);
+      if (strlen($hash) > 64) $hash = substr($hash, 1, 64);
     }
-    if (strlen($hash) < 32) {
-      $hash = str_repeat(32 - strlen($hash)) . $hash;
-    }
-    return $hash;
+    return $this->leftPadHex($hash, 64);
   }
 
   // PHP has bin2hex($x). An easier to remember name for pack("H*", $x)
@@ -385,7 +390,14 @@ class LoomClient
     $value = bchexdec($hash);
     $bits128 = $this->bits128;
     $location = bcxor(bcrightshift($value, 128), bcand($value, $bits128));
-    return bcdechex($location);
+    return leftPadHex(bcdechex($location), 32);
+  }
+
+  function leftPadHex($hex, $chars) {
+    if (strlen($hex) < $chars) {
+      $hex = str_repeat("0", $chars - $strlen($hex)) . $hex;
+    }
+    return $hex;
   }
 
 } // End of LoomClient class

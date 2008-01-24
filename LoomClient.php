@@ -1,6 +1,7 @@
 <?php
 require_once "bcbitwise.php";
 require_once "Socket.php";
+require_once "LoomRandom.php";
 
 /*
  * Client to the webapp at http://loom.cc/
@@ -241,8 +242,22 @@ class LoomClient
   // Return the session associated with a folder location
   // Create a new session if one doesn't already exist,
   // buying the location to store it as necessary.
+  // Returns false if it can't buy the session location
   function folderSession($folder_location) {
-    
+    $loc = $this->leftPadHex(bcxorhex($folder_location, "1"), 32);
+    $res = $this->touch_archive($loc, $url);
+    if ($res['status'] == 'success') {
+      return $res['content'];
+    }
+    $client = new LoomRandom();
+    $session = $client->random_id();
+    $res = $this->buy_archive($session, $folder_location, $url);
+    if ($res['status'] != 'success') return false;
+    // Probably don't need this, but you never know
+    $this->buy_archive($loc, $folder_location, $url);
+    $res = $this->write_archive($loc, $folder_location, $session, $url);
+    if ($res['status'] != 'success') return false;
+    return $session;
   }
 
   function parsekv($kv, $recursive=FALSE) {
@@ -390,7 +405,7 @@ class LoomClient
     $value = bchexdec($hash);
     $bits128 = $this->bits128;
     $location = bcxor(bcrightshift($value, 128), bcand($value, $bits128));
-    return leftPadHex(bcdechex($location), 32);
+    return $this->leftPadHex(bcdechex($location), 32);
   }
 
   function leftPadHex($hex, $chars) {

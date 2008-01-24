@@ -211,7 +211,7 @@ class LoomClient
       $ids .= $id;
       $min_precision = $type['min_precision'];
       $scale = $type['scale'];
-      $types .= ":type_name.$id\n=$name\n";
+      $types .= ":type_name.$id\n=" . $this->quote_cstring($name) . "\n";
       if ($min_precision != '0') {
         $types .= ":type_min_precision.$id\n=$min_precision\n";
       }
@@ -221,6 +221,18 @@ class LoomClient
     }
     $res .= ":list_type\n=$ids\n";
     $res .= $types;
+
+    $ids = "";
+    $locations = "";
+    foreach ($folder['locs'] as $name => $location) {
+      if ($ids != '') $ids .= ' ';
+      $ids .= $location;
+      $locations .= ":loc_name.$location\n=" . $this->quote_cstring($name) . "\n";
+    }
+    $res .= ":list_loc\n=$ids\n";
+    $res .= $locations;
+
+    $res .= ")\n";
 
     return $res;
   }

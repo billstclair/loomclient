@@ -158,6 +158,73 @@ class LoomClient
     return $str;
   }
 
+  function parseFolder($location, $folder) {
+    global $client;
+
+    $paren_pos = strpos($folder, "(");
+    if ($paren_pos || $folder[0] == '(') {
+      $kv = substr($folder, $paren_pos);
+      $res = array();
+      $keys = $client->parsekv($kv);
+      $keytypes = explode(' ', $keys['list_type']);
+      $types = array();
+      foreach ($keytypes as $keytype) {
+        $type = array('name' => $keys["type_name.$keytype"],
+                      'id' => $keytype,
+                      'min_precision' => blankToZero($keys["type_min_precision.$keytype"]),
+                      'scale' => blankToZero($keys["type_scale.$keytype"]));
+        //$types[$keytype] = $type;
+        $types[$type['name']] = $type;
+      }
+      ksort($types);
+      $res['types'] = $types;
+      $keylocs = explode(' ', $keys['list_loc']);
+      $locs = array();
+      foreach ($keylocs as $keyloc) {
+        $name = $keys["loc_name.$keyloc"];
+        if ($name != '') {
+          if ($keyloc == $location) {
+            $folder_name = $name;
+          }
+          $locs[$name] = $keyloc;
+          //$locs[$keyloc] = $name;
+        }
+      }
+      ksort($locs);
+      $res['locs'] = $locs;
+      $res['name'] = $folder_name;
+      $res['loc'] = $location;
+      return $res;
+    }
+    return FALSE;
+  }
+
+  // Convert our array() representation of the folder
+  // into the string to write into the archive
+  function folderArchiveString($folder) {
+    $res = "Content-type: loom/folder\n\n(\n";
+    $types = "";
+    $ids = "";
+    foreach ($folder['types'] as $name => $type) {
+      $id = $type['id'];
+      if ($ids != '') $ids .= ' ';
+      $ids .= $id;
+      $min_precision = $type['min_precision'];
+      $scale = $type['scale'];
+      $types .= ":type_name.$id\n=$name\n";
+      if ($min_precision != '0') {
+        $types .= ":type_min_precision.$id\n=$min_precision\n";
+      }
+      if ($scale != '0') {
+        $types .= ":type_scale.$id\n=$scale\n";
+      }
+    }
+    $res .= ":list_type\n=$ids\n";
+    $res .= $types;
+
+    return $res;
+  }
+
   function parsekv($kv, $recursive=FALSE) {
     $lines = explode("\n", $kv);
     $first = true;

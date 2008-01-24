@@ -351,7 +351,7 @@ Types</span></td>
 <input type="hidden" name="greendot" value=""/>
 <table>
 <tr>
-<td><a class=name_dot href="javascript: greenDot('<? echo $folder_name; ?>')" title="Edit Name">&bull;</a></td>
+<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $folder_name; ?>')" title="Edit Name">&nbsp;&bull;&nbsp;</a></td>
 <?
   echo "<td>";
   if ($greendot != $folder_name) echo "<b>$folder_name</b>";
@@ -366,7 +366,7 @@ Types</span></td>
     if ($name != $folder_name) {
 ?>
 <tr>
-<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $name; ?>')" title="Edit Name or Delete Folder">&bull;</a></td>
+<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $name; ?>')" title="Edit Name or Delete Folder">&nbsp;&bull;&nbsp;</a></td>
 <?
       echo "<td>";
       if ($greendot != $name) echo $name;
@@ -395,7 +395,7 @@ function login() {
     $loc = $client->hash2location($client->sha256($passphrase));
     $res = $client->touch_archive($loc, $url);
     if ($res['status'] != 'success') return FALSE;
-    $folder = parseFolder($loc, $res['content']);
+    $folder = $client->parseFolder($loc, $res['content']);
     $folderkv = $client->array2kv($folder);
   }
   $folder_name = $folder['name'];
@@ -406,47 +406,6 @@ function login() {
 function blankToZero($x) {
   if ($x == '') return 0;
   return $x;
-}
-
-function parseFolder($location, $folder) {
-  global $client;
-
-  $paren_pos = strpos($folder, "(");
-  if ($paren_pos || $folder[0] == '(') {
-    $kv = substr($folder, $paren_pos);
-    $res = array();
-    $keys = $client->parsekv($kv);
-    $keytypes = explode(' ', $keys['list_type']);
-    $types = array();
-    foreach ($keytypes as $keytype) {
-      $type = array('name' => $keys["type_name.$keytype"],
-                    'id' => $keytype,
-                    'min_precision' => blankToZero($keys["type_min_precision.$keytype"]),
-                    'scale' => blankToZero($keys["type_scale.$keytype"]));
-      //$types[$keytype] = $type;
-      $types[$type['name']] = $type;
-    }
-    ksort($types);
-    $res['types'] = $types;
-    $keylocs = explode(' ', $keys['list_loc']);
-    $locs = array();
-    foreach ($keylocs as $keyloc) {
-      $name = $keys["loc_name.$keyloc"];
-      if ($name != '') {
-        if ($keyloc == $location) {
-          $folder_name = $name;
-        }
-        $locs[$name] = $keyloc;
-        //$locs[$keyloc] = $name;
-      }
-    }
-    ksort($locs);
-    $res['locs'] = $locs;
-    $res['name'] = $folder_name;
-    $res['loc'] = $location;
-    return $res;
-  }
-  return FALSE;
 }
 
 function applyScale($value, $min_precision, $scale) {

@@ -12,13 +12,15 @@ class LoomClient
 {
   var $url_prefix;              // Who you gonna call?
   var $bits128;                 // 128 1-bits = 2**128 - 1
-  var $socket;
+  var $socket;                  // our connection to the Loom server
+  var $random;                  // An instance of LoomRandom
 
   function LoomClient($prefix = 'https://loom.cc/') {
     if (substr($prefix, -1) != '/') $prefix .= '/';
     $this->url_prefix = $prefix;
     $this->bits128  = bcsub(bcleftshift(1, 128), 1);
     $this->socket = FALSE;
+    $this->random = new LoomRandom();
   }
 
   // This is all you really need to call
@@ -249,8 +251,7 @@ class LoomClient
     if ($res['status'] == 'success') {
       return $res['content'];
     }
-    $client = new LoomRandom();
-    $session = $client->random_id();
+    $session = $this->random->random_id();
     $res = $this->buy_archive($session, $folder_location, $url);
     if ($res['status'] != 'success') return false;
     // Probably don't need this, but you never know
@@ -413,6 +414,33 @@ class LoomClient
       $hex = str_repeat("0", $chars - $strlen($hex)) . $hex;
     }
     return $hex;
+  }
+
+  function xorLocations($l1, $l2) {
+    return $this->leftPadHex(bcxorhex($l1, $l2), 32);
+  }
+
+  // Returns true if $location is occupied for $type, i.e. if touch() will succeed
+  function isLocationOccuppied($type, $location) {
+    $res = $this->touch($type, $location, $url);
+    return $res['status'] == 'success';
+  }
+
+  // Returns true if $location is vacant for $type,
+  // i.e. if touch() fails with vacant
+  function isLocationVacant($type, $location) {
+    $res = $this->touch($type, $location, $url);
+    return ($res['status'] == 'fail') && ($res['error_loc'] == 'vacant');
+  }
+
+  // Return a random vacant location.
+  // If can't find one after 10 tries, return false.
+  function randomVacantLocation($type) {
+    for ($i=0; $i<10; $i++) {
+      $id = $this->random->random_id();
+      if ($this->isLocationVacant($type, $id)) return $id;
+    }
+    return false;
   }
 
 } // End of LoomClient class

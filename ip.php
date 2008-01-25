@@ -17,6 +17,7 @@ function mq($x) {
 }
 
 $passphrase = mq($_POST['passphrase']);
+$session = mq($_POST['session']);
 $qty = mq($_POST['zip']);
 $type = mq($_POST['type']);
 $location = mq($_POST['location']);
@@ -44,7 +45,7 @@ if ($page == 'refresh') {
   if ($valueskv != '') $values = $client->parsekv($valueskv, TRUE);
 }
 
-if ($passphrase == '' || !login()) {
+if (($session == '' && $passphrase == '') || !login()) {
   $onload = 'passphrase';
   $page = 'login';
 } else {
@@ -392,10 +393,21 @@ Types</span></td>
 }
 
 function login() {
-  global $client, $passphrase, $folder, $folderkv, $folder_name, $folder_loc;
+  global $client, $passphrase, $session;
+  global $folder, $folderkv, $folder_name, $folder_loc;
 
+  $loc = FALSE;
   if ($folder == '') {
-    $loc = $client->hash2location($client->sha256($passphrase));
+    if ($session != '') {
+      $res = $client->touch_archive($session, $url);
+      if ($res['status'] == 'success') $loc = $res['content'];
+    }
+    if (!$loc) {
+      if ($passphrase != '') {
+        $loc = $client->hash2location($client->sha256($passphrase));
+        $session_loc = $client->folderSession($loc);
+      } else return FALSE;
+    }
     $res = $client->touch_archive($loc, $url);
     if ($res['status'] != 'success') return FALSE;
     $folder = $client->parseFolder($loc, $res['content']);

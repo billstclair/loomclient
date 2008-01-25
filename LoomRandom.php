@@ -5,23 +5,32 @@
 class LoomRandom {
 
   var $urandom_filehandle;      // /dev/urandom file handle
+  var $use_urandom;             // false if we can't open /dev/urandom
 
   function LoomRandom() {
     $this->urandom_filehandle = false;
+    $this->use_urandom = true;
   }
 
   // Return $num random bytes from /dev/urandom
   function urandom_bytes($num) {
     if ($num < 0)
       err("NUM must be nonnegative in urandom_bytes");
-    if (!$this->urandom_filehandle) {
-      $file = fopen("/dev/urandom", "r");
-      if (!$file) err("Unable to open /dev/urandom");
-      $this->urandom_filehandle = $file;
+    if ($this->use_urandom && !$this->urandom_filehandle) {
+      $file = @fopen("/dev/urandom", "r");
+      if (!$file) $this->use_urandom = false;
+      else $this->urandom_filehandle = $file;
     }
     $res = '';
-    while (strlen($res) < $num)
-      $res .= fread($this->urandom_filehandle, $num - strlen($res));
+    if ($this->use_urandom) {
+      while (strlen($res) < $num) {
+        $res .= fread($this->urandom_filehandle, $num - strlen($res));
+      }
+    } else {
+      for ($i=0; $i<$num; $i++) {
+        $res .= chr(mt_rand(0, 255));
+      }
+    }
     return $res;
   }
 

@@ -37,7 +37,18 @@ class LoomClient
   }
   */
 
-  function get($keys, &$url) {
+  // The base of the Loom interface
+  // Send an HTTP GET, with args in $keys.
+  // Return whatever Loom returns.
+  function rawget($keys, &$url) {
+    return $this->rawGetOrPost($keys, 'get', $url);
+  }
+
+  function rawpost($keys, &$url) {
+    return $this->rawGetOrPost($keys, 'post', $url);
+  }
+
+  function rawGetOrPost($keys, $getOrPost, &$url) {
     if (!$this->socket) {
       // Should make this less brittle
       if (substr($this->url_prefix, 0, 5) == 'https') {
@@ -53,11 +64,18 @@ class LoomClient
     $uri = $this->url('', $keys);
     $url = $this->url_prefix . $uri;
     $uri = '/' . $uri;
-    $this->socket->get($uri);
-    $kv = $this->socket->body;
-    return $this->parsekv($kv);
+    if ($getOrPost == 'post') $this->socket->post($uri);
+    else $this->socket->get($uri);
+    return $this->socket->body;
   }
 
+  // This is all you really need to call
+  // The functions below are just syntactic sugar for calling get()
+  function get($keys, &$url) {
+    $kv = $this->rawget($keys, $url);
+    return $this->parsekv($kv);
+  }
+    
 
   function buy($type, $location, $usage, &$url) {
     return $this->get(array('function' => 'grid',
@@ -259,6 +277,19 @@ class LoomClient
     $res = $this->write_archive($loc, $folder_location, $session, $url);
     if ($res['status'] != 'success') return false;
     return $session;
+  }
+
+  // This doesn't yet test that it worked.
+  // I'll wait for Patrick to make a KV-returning version,
+  // instead of attempting to parse the returned HTML
+  function renameFolderLocation($session, $oldname, $newname) {
+    $res = $this->rawget(array('function' => 'folder_locations',
+                                'session' => $session,
+                                'old_name' => $oldname,
+                                'new_name' => $newname,
+                                'save' => 'Save'),
+                         $url);
+    return $res;
   }
 
   function parsekv($kv, $recursive=FALSE) {

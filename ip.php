@@ -122,11 +122,10 @@ function doMain() {
 }
 
 function doLocations() {
-  // https://loom.cc/?function=folder_locations&session=42fabf3a06e44e598a3b09767dd05f34&old_name=BillStClair&new_name=Bill+St.+Clair&save=Save
   // Need to investigate how to delete.
   // The "session" is an archive location containing the folder location
 
-  global $client, $folder, $values;
+  global $client, $folder, $values, $valueskv;
   global $newname, $oldname;
   global $savename, $delete, $add_location;
   global $session;
@@ -139,12 +138,14 @@ function doLocations() {
       $message = "Duplicate Location Name";
       return;
     }
-    $client->renameFolderLocation($session, $oldname, $newname);
+    $res = $client->renameFolderLocation($session, $oldname, $newname);
+    //echo $res;
     refreshFolder();
     // This is slow, but better than getting out of sync.
     // Yes, I could update the $values with the new name.
     // Maybe the additional speed would be good.
-    scanFolder();
+    $values = scanFolder($folder);
+    $valueskv = $client->array2kv($values);
   }
 
 }

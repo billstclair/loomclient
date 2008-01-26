@@ -130,6 +130,93 @@ class LoomClient
                       $url);
   }
 
+  // $locs and $types are lists of space-separated hex IDs.
+  // If $zeroes is true, will return 0 values.
+  function scan($locs, $types, $zeroes, &$url) {
+    $a = array('function' => 'grid',
+               'action' => 'scan',
+               'locs' => $locs,
+               'types' => $types);
+    if ($zeroes) $a['zeroes'] = '1';
+    return $this->get($a, $url);
+  }
+
+  // $locs is array(locname => id, ...)
+  // $types is array(typename => array('id' => id,
+  //                                   'name' => typename,
+  //                                   'min_precision' => min_precision,
+  //                                   'scale' => scale),
+  //                 ...)
+  // Returns array(locname => array(typename => value, ...), ...)
+  // Returns FALSE if it gets an error from the loom server
+  function namedScan($locs, $types, $zeroes, &$url) {
+    $loca = array();
+    $locstring = "";
+    foreach ($locs as $locname => $id) {
+      if ($locstring != '') $locstring .= ' ';
+      $locstring .= $id;
+      $loca[$id] = $locname;
+    }
+
+    $typea = array();
+    $typestring = "";
+    foreach ($types as $typename => $attributes) {
+      $id = $attributes['id'];
+      if ($typestring != '') $typestring .= ' ';
+      $typestring .= $id;
+      $typea[$id] = $attributes;
+    }
+
+    $res = $this->scan($locstring, $typestring, $zeroes, &$url);
+
+    $resa = array();
+    foreach ($loca as $id => $locname) {
+      $vals = explode(' ', $res["loc/$id"]);
+      $vala = array();
+      foreach ($vals as $val) {
+        $val = explode(':', $val);
+        $value = $val[0];
+        $id = $val[1];
+        $attributes = $typea[$id];
+        $typename = $attributes['name'];
+        $min_precision = $attributes['min_precision'];
+        $scale = $attributes['scale'];
+        $vala[$typename] = $this->applyScale($value, $min_precision, $scale);
+      }
+      $resa[$locname] = $vala;
+    }
+    return $resa;
+  }
+
+  function applyScale($value, $min_precision, $scale) {
+    if ($value < 0) $value++;
+    if ($scale > 0) $value = bcdiv($value, bcpow(10, $scale, 0), $scale);
+
+    $dotpos = strpos($value, '.');
+
+    if ($dotpos > 0) {
+      while (substr($value, -1) == '0') {
+        $value = substr($value, 0, strlen($value)-1);
+      }
+      if (substr($value, -1) == '.') {
+        $value = substr($value, 0, strlen($value)-1);
+        $dotpos = 0;
+      }
+    }
+
+    if ($min_precision > 0) {
+      if ($dotpos == 0) {
+        $value .= ".";
+        $dotpos = strlen($value);
+      } else $dotpos++;
+      $places = strlen($value) - $dotpos;
+      if ($min_precision > $places) {
+        $value .= str_repeat("0", $min_precision - $places);
+      }
+    }
+    return $value;
+  }
+
   function buy_archive($loc, $usage, &$url) {
     return $this->get(array('function' => 'archive',
                             'action' => 'buy',

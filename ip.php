@@ -30,6 +30,7 @@ $greendot = mq($_POST['greendot']);
 $showfolder = mq($_POST['showfolder']);
 $newname = mq($_POST['newname']);
 $oldname = mq($_POST['oldname']);
+$newlocation = mq($_POST['newlocation']);
 $savename = mq($_POST['savename']);
 $delete = mq($_POST['delete']);
 $add_location = mq($_POST['add_location']);
@@ -60,6 +61,8 @@ if (($session == '' && $passphrase == '') || !login()) {
   }
 }
 
+$title = "Loom Folder";
+
 if ($page == 'main') doMain();
 elseif ($page == 'locations') doLocations();
 
@@ -68,6 +71,7 @@ drawHead();
 if ($page == 'login') drawLogin();
 elseif ($page == 'main') drawMain();
 elseif ($page == 'locations') drawLocations();
+elseif ($page == 'add_location') drawAddLocation();
 
 drawTail();
 
@@ -108,8 +112,8 @@ function doMain() {
       if ($transferred) {
         $status = $res['status'];
         if ($status == 'success') {
-          $value_orig = applyScale($res['value_orig'], $min_precision, $scale);
-          $value_dest = applyScale($res['value_dest'], $min_precision, $scale);
+          $value_orig = $client->applyScale($res['value_orig'], $min_precision, $scale);
+          $value_dest = $client->applyScale($res['value_dest'], $min_precision, $scale);
           $values[$loc_orig][$type] = $value_orig;
           ksort($values[$loc_orig]);
           $values[$loc_dest][$type] = $value_dest;
@@ -129,9 +133,11 @@ function doLocations() {
   global $newname, $oldname;
   global $savename, $delete, $add_location;
   global $session;
-  global $message, $onload;
+  global $message, $title, $onload, $page;
 
   $onload = 'newname';
+  $title = 'Loom Locations';
+
   if ($savename != '') {
     if ($newname == $oldname) return;
     if ($folder['locs'][$newname] != '') {
@@ -140,23 +146,23 @@ function doLocations() {
     }
     $res = $client->renameFolderLocation($session, $oldname, $newname);
     //echo $res;
-    refreshFolder();
-    // This is slow, but better than getting out of sync.
-    // Yes, I could update the $values with the new name.
-    // Maybe the additional speed would be good.
-    $values = scanFolder($folder);
-    $valueskv = $client->array2kv($values);
+    fullRefresh();
+  }
+
+  else if ($add_location != '') {
+    $title = 'Loom Add Location';
+    $page = 'add_location';
   }
 
 }
 
 function drawHead() {
-  global $onload;
+  global $title, $onload;
 ?>
 <html>
 <head>
 <meta name="viewport" content="width=device-width" user-scalable="no" minimum-scale="1.0" maximum-scale="1.0"/>
-<title>Loom Folder</title>
+<title><? echo $title; ?></title>
 
 <script language="JavaScript">
 function submitPage(page) {
@@ -168,6 +174,17 @@ function greenDot(greendot) {
   document.forms["mainform"].greendot.value = greendot;
   document.mainform.submit();
 }
+
+function hideAddressbar() {
+  window.scrollTo(0, 1);
+}
+
+addEventListener("load", function() {
+  setTimeout(hideAddressbar, 0);
+}, false);
+
+<? additionalHTMLScripts(); ?>
+
 </script>
 
 <style type="text/css">
@@ -210,6 +227,40 @@ A.name_dot { font-size:16pt; font-weight:bold; color:green; }
 <table width="320px">
 <tr><td>
 <?
+}
+
+function additionalHTMLScripts() {
+  global $page;
+
+  if ($page == 'add_location') {
+
+?>
+function Do0(form) { form.newlocation.value  = form.newlocation.value +"0"  ;}
+function Do1(form) { form.newlocation.value  = form.newlocation.value +"1"  ;}
+function Do2(form) { form.newlocation.value  = form.newlocation.value +"2"  ;}
+function Do3(form) { form.newlocation.value  = form.newlocation.value +"3"  ;}
+function Do4(form) { form.newlocation.value  = form.newlocation.value +"4"  ;}
+function Do5(form) { form.newlocation.value  = form.newlocation.value +"5"  ;}
+function Do6(form) { form.newlocation.value  = form.newlocation.value +"6"  ;}
+function Do7(form) { form.newlocation.value  = form.newlocation.value +"7"  ;}
+function Do8(form) { form.newlocation.value  = form.newlocation.value +"8"  ;}
+function Do9(form) { form.newlocation.value  = form.newlocation.value +"9"  ;}
+function DoA(form) { form.newlocation.value  = form.newlocation.value +"a"  ;}
+function DoB(form) { form.newlocation.value  = form.newlocation.value +"b"  ;}
+function DoC(form) { form.newlocation.value  = form.newlocation.value +"c"  ;}
+function DoD(form) { form.newlocation.value  = form.newlocation.value +"d"  ;}
+function DoE(form) { form.newlocation.value  = form.newlocation.value +"e"  ;}
+function DoF(form) { form.newlocation.value  = form.newlocation.value +"f"  ;}
+function DoBksp(form) 
+{ var T  = form.newlocation.value; 
+  var L  = T.length; 
+  var T2  = T.substr(0,L-1); 
+  form.newlocation.value  = T2;
+}
+function DoClr(form)  { form.newlocation.value = ""; }
+function DoEnter(form)  { document.entryForm.submit(); }
+<?
+  }
 }
 
 function drawTail() {
@@ -292,8 +343,8 @@ function drawMain() {
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
 <a href="javascript:submitPage('locations');">Locations</a>
-&nbsp;
-Types</span></td>
+<!--&nbsp;
+Types--></span></td>
 </tr>
 </table>
 <?
@@ -375,8 +426,8 @@ function drawLocations() {
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
 &nbsp;
 Locations
-&nbsp;
-Types</span></td>
+<!--&nbsp;
+Types--></span></td>
 </tr>
 </table>
 <table border="0" width="99%">
@@ -419,7 +470,7 @@ Types</span></td>
         echo '<input type="submit" name="savename" value="Save"/>' . "\n";
         echo '<input type="submit" name="cancel" value="Cancel"/>' . "\n";
         echo "&nbsp;&nbsp;";
-        echo '<input type="submit" name="delete" value="Delete..."/><br/>' . "\n";
+        echo '<input type="submit" disabled name="delete" value="Delete..."/><br/>' . "\n";
         echo '</td></tr><tr><td colspan="2"><span class="mono">' . "<b>$loc</b></span><br/>\n";
       }
       echo "</td></tr>\n";
@@ -433,6 +484,55 @@ Types</span></td>
 </table>
 
 <p>Click the green dot by a folder name to see its hex value, or to rename or delete it.</p>
+<?
+}
+
+function drawAddLocation() {
+  global $newname, $newlocation;
+
+?>
+<form name="entryForm" method="post" action=""><b>
+<?
+hiddenValue('session'); echo "\n";
+hiddenValue('folderkv'); echo "\n";
+hiddenValue('valueskv');
+hiddenValue('page');
+?>
+Enter name:<br/>
+<input type="text" name="newname" style="font-size: 14pt;" size="25" value="<? echo $newname; ?>"/><br/>
+Enter Location, blank for random:<br/>
+<input type="text" style="font-size: 11pt;" size="32" name="newlocation" value="<? echo $newlocation; ?>"/>
+<table>
+<tr>
+<td><input type="button" style="font-size: 18pt;" value="7" onClick="Do7(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="8" onClick="Do8(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="9" onClick="Do9(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="F" onClick="DoF(this.form)"></td>
+</tr>
+<tr>
+<td><input type="button" style="font-size: 18pt;" value="4" onClick="Do4(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="5" onClick="Do5(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="6" onClick="Do6(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="E" onClick="DoE(this.form)"></td>
+</tr>
+<tr>
+<td><input type="button" style="font-size: 18pt;" value="1" onClick="Do1(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="2" onClick="Do2(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="3" onClick="Do3(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="D" onClick="DoD(this.form)"></td>
+</tr>
+<tr>
+<td><input type="button" style="font-size: 18pt;" value="0" onClick="Do0(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="A" onClick="DoA(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="B" onClick="DoB(this.form)"></td>
+<td><input type="button" style="font-size: 18pt;" value="C" onClick="DoC(this.form)"></td>
+</tr>
+<tr>
+</table>
+<input type="button" style="font-size: 18pt;" value="Del" onClick="DoBksp(this.form)">
+<input type="button" style="font-size: 18pt;" value="Clr" onClick="DoClr(this.form)">
+<input type="button" style="font-size: 18pt;" value="Enter" onClick="DoEnter(this.form)"><br/>
+</b></form>
 <?
 }
 
@@ -473,44 +573,24 @@ function refreshFolder() {
   return TRUE;
 }
 
+function fullRefresh() {
+  global $client, $folder, $values, $valueskv;
+
+  refreshFolder();
+  $values = scanFolder($folder);
+  $valueskv = $client->array2kv($values);
+}
+
 function blankToZero($x) {
   if ($x == '') return 0;
   return $x;
-}
-
-function applyScale($value, $min_precision, $scale) {
-  if ($value < 0) $value++;
-  if ($scale > 0) $value = bcdiv($value, bcpow(10, $scale, 0), $scale);
-
-  $dotpos = strpos($value, '.');
-
-  if ($dotpos > 0) {
-    while (substr($value, -1) == '0') {
-      $value = substr($value, 0, strlen($value)-1);
-    }
-    if (substr($value, -1) == '.') {
-      $value = substr($value, 0, strlen($value)-1);
-      $dotpos = 0;
-    }
-  }
-
-  if ($min_precision > 0) {
-    if ($dotpos == 0) {
-      $value .= ".";
-      $dotpos = strlen($value);
-    } else $dotpos++;
-    $places = strlen($value) - $dotpos;
-    if ($min_precision > $places) {
-      $value .= str_repeat("0", $min_precision - $places);
-    }
-  }
-  return $value;
 }
 
 // This is currently n-squared for pretty big n, since it has to do
 // a web call for each location/type pair.
 // Patrick has promised a scan() function in the web API that would
 // allow it to be done with a single call.
+/* Now uses Patrick's scan() API call
 function scanFolder($folder) {
   global $client;
 
@@ -525,13 +605,20 @@ function scanFolder($folder) {
       $scale = $type['scale'];
       $res = $client->touch($id, $loc, $url);
       if ($res['status'] == 'success') {
-        $value = applyScale($res['value'], $min_precision, $scale);
+        $value = $client->applyScale($res['value'], $min_precision, $scale);
         $loc_values[$typename] = $value;
       }
     }
     $values[$locname] = $loc_values;
   }
   return $values;
+}
+*/
+
+function scanFolder($folder) {
+  global $client;
+
+  return $client->namedScan($folder['locs'], $folder['types'], FALSE, $url);
 }
 
 

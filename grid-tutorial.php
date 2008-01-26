@@ -92,7 +92,7 @@ if ($page == 'grid') {
   echo 'Tools page (login required).';
  }
 ?>
-Note that if you enter any real locations containing valuable assets in this page, those locations are being transferred through my web site to loom.cc. All trasmissions are encrypted, so it's unlikely that anybody can steal your valuable information en-route, but you ARE trusting me to not snarf your locations with my PHP code. I promise that unless somebody hacks my site, the code that is running is the code I've posted at the link below, which does NOT save your information anywhere, just passes it on to loom.cc. But if you don't trust me, don't give away anything important.
+ Note that if you enter any real locations containing valuable assets in this page, those locations are being transferred through my web site to loom.cc. All trasmissions are encrypted, so it's unlikely that anybody can steal your valuable information en-route, but you ARE trusting me to not snarf your locations with my PHP code. I promise that unless somebody hacks my site, the code that is running is the code I've posted at the link below, which does NOT save your information anywhere, just passes it on to loom.cc. But if you don't trust me, don't give away anything important.
 <p>
 Download source at
 <a href="../loomclient.tar.gz">loomclient.tar.gz</a>

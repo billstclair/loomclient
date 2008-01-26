@@ -28,10 +28,15 @@ $give = mq($_POST['give']);
 $page = mq($_POST['page']);
 $greendot = mq($_POST['greendot']);
 $showfolder = mq($_POST['showfolder']);
+$newname = mq($_POST['newname']);
+$oldname = mq($_POST['oldname']);
+$savename = mq($_POST['savename']);
+$delete = mq($_POST['delete']);
+$add_location = mq($_POST['add_location']);
 
 $client = new LoomClient();
 
-$onload = 'qty';
+$onload = 'zip';
 $folder = '';
 $values = '';
 $message = '';
@@ -55,76 +60,16 @@ if (($session == '' && $passphrase == '') || !login()) {
   }
 }
 
-?><html>
-<head>
-<meta name="viewport" content="width=device-width" user-scalable="no" minimum-scale="1.0" maximum-scale="1.0"/>
-<title>Loom Folder</title>
-
-<script language="JavaScript">
-function submitPage(page) {
-  document.forms["mainform"].page.value = page;
-  document.mainform.submit();
-}
-
-function greenDot(greendot) {
-  document.forms["mainform"].greendot.value = greendot;
-  document.mainform.submit();
-}
-</script>
-
-<style type="text/css">
-body { font-family: verdana, arial, sans-serif; font-size: 12pt }
-div { font-size:12pt }
-p { font-size:12pt }
-h1 { font-size:14pt }
-h2 { font-size:12pt }
-h3 { font-size:10pt }
-td { font-size:12pt }
-ul { font-size:12pt }
-li { padding-bottom: 7px }
-pre { font-family: verdana, arial, sans-serif; }
-A:link, A:visited { color:blue; text-decoration:none }
-A:hover { color:blue; text-decoration:underline }
-A:active { color:#FAD805; text-decoration:underline }
-.tt { font-family: Courier; font-size:10pt }
-.mono { font-family: monospace; font-size: 11pt }
-.large_mono { font-family: monospace; font-size: 10pt }
-.giant_mono { font-family: monospace; font-size: 14pt }
-.tiny_mono { font-family: monospace; font-size: 6pt }
-.normal { font-size:10pt }
-.smaller { font-size:6pt }
-.small { font-size:8pt }
-.large { font-size:12pt }
-.alarm { color:red }
-.focus_value { background-color:#DDDDDD }
-.color_heading { margin-top:12px; padding:1px; background-color:#DDDDDD; width:100% }
-A.label_link { font-weight:bold; }
-A.highlight_link { font-weight:bold; }
-A.cancel { background-color:#FFDDDD }
-A.plain:link, A.plain:visited { color:black; text-decoration:none }
-A.plain:hover { color:blue; text-decoration:underline }
-A.plain:active { color:#FAD805; text-decoration:underline }
-A.name_dot { font-size:16pt; font-weight:bold; color:green; }
-</style>
-
-</head>
-<body onload="document.forms[0].<? echo $onload; ?>.focus()">
-<table width="320px">
-<tr><td>
-<?
-
 if ($page == 'main') doMain();
 elseif ($page == 'locations') doLocations();
+
+drawHead();
 
 if ($page == 'login') drawLogin();
 elseif ($page == 'main') drawMain();
 elseif ($page == 'locations') drawLocations();
 
-?></td></tr>
-</table>
-</body>
-</html>
-<?
+drawTail();
 
 function doMain() {
   global $qty, $type, $location, $take, $give;
@@ -180,6 +125,98 @@ function doLocations() {
   // https://loom.cc/?function=folder_locations&session=42fabf3a06e44e598a3b09767dd05f34&old_name=BillStClair&new_name=Bill+St.+Clair&save=Save
   // Need to investigate how to delete.
   // The "session" is an archive location containing the folder location
+
+  global $client, $folder, $values;
+  global $newname, $oldname;
+  global $savename, $delete, $add_location;
+  global $session;
+  global $message, $onload;
+
+  $onload = 'newname';
+  if ($savename != '') {
+    if ($newname == $oldname) return;
+    if ($folder['locs'][$newname] != '') {
+      $message = "Duplicate Location Name";
+      return;
+    }
+    $client->renameFolderLocation($session, $oldname, $newname);
+    refreshFolder();
+    // This is slow, but better than getting out of sync.
+    // Yes, I could update the $values with the new name.
+    // Maybe the additional speed would be good.
+    scanFolder();
+  }
+
+}
+
+function drawHead() {
+  global $onload;
+?>
+<html>
+<head>
+<meta name="viewport" content="width=device-width" user-scalable="no" minimum-scale="1.0" maximum-scale="1.0"/>
+<title>Loom Folder</title>
+
+<script language="JavaScript">
+function submitPage(page) {
+  document.forms["mainform"].page.value = page;
+  document.mainform.submit();
+}
+
+function greenDot(greendot) {
+  document.forms["mainform"].greendot.value = greendot;
+  document.mainform.submit();
+}
+</script>
+
+<style type="text/css">
+body { font-family: verdana, arial, sans-serif; font-size: 12pt }
+div { font-size:12pt }
+p { font-size:12pt }
+h1 { font-size:14pt }
+h2 { font-size:12pt }
+h3 { font-size:10pt }
+td { font-size:12pt }
+ul { font-size:12pt }
+li { padding-bottom: 7px }
+pre { font-family: verdana, arial, sans-serif; }
+A:link, A:visited { color:blue; text-decoration:none }
+A:hover { color:blue; text-decoration:underline }
+A:active { color:#FAD805; text-decoration:underline }
+.tt { font-family: Courier; font-size:10pt }
+.mono { font-family: monospace; font-size: 11pt }
+.large_mono { font-family: monospace; font-size: 10pt }
+.giant_mono { font-family: monospace; font-size: 14pt }
+.tiny_mono { font-family: monospace; font-size: 6pt }
+.normal { font-size:10pt }
+.smaller { font-size:6pt }
+.small { font-size:8pt }
+.large { font-size:12pt }
+.alarm { color:red; font-weight: bold }
+.focus_value { background-color:#DDDDDD }
+.color_heading { margin-top:12px; padding:1px; background-color:#DDDDDD; width:100% }
+A.label_link { font-weight:bold; }
+A.highlight_link { font-weight:bold; }
+A.cancel { background-color:#FFDDDD }
+A.plain:link, A.plain:visited { color:black; text-decoration:none }
+A.plain:hover { color:blue; text-decoration:underline }
+A.plain:active { color:#FAD805; text-decoration:underline }
+A.name_dot { font-size:16pt; font-weight:bold; color:green; }
+</style>
+
+</head>
+<body onload="document.forms[0].<? echo $onload; ?>.select()">
+<table width="320px">
+<tr><td>
+<?
+}
+
+function drawTail() {
+?></td></tr>
+</table>
+</body>
+</html>
+<?
 }
 
 function drawLogin() {
@@ -242,7 +279,7 @@ function drawValues($name, $typevalues) {
 }
 
 function drawMain() {
-  global $passphrase, $folder, $values, $folder_name;
+  global $session, $folder, $values, $folder_name;
   global $qty, $type, $location;
   global $message;
 
@@ -264,7 +301,7 @@ Types</span></td>
 <table border="0" width="99%">
 <form name="mainform" method="post" action="" autocomplete="off">
 <?
-hiddenValue('passphrase'); echo "\n";
+hiddenValue('session'); echo "\n";
 hiddenValue('folderkv'); echo "\n";
 hiddenValue('valueskv');
 hiddenValue('page');
@@ -311,7 +348,7 @@ foreach($values as $loc => $value) {
 </tr>
 <?
   if ($message != '') {
-    echo '<tr><td></td><td><span style="color: red; font-weight: bold;">' . hsc($message) . "</span></td></tr>\n";
+    echo '<tr><td></td><td class="alarm">' . hsc($message) . "</td></tr>\n";
   }
 ?></table>
 </form>
@@ -326,7 +363,7 @@ foreach($values as $loc => $value) {
 }
 
 function drawLocations() {
-  global $passphrase, $folder, $values, $folder_name;
+  global $session, $folder, $values, $folder_name;
   global $qty, $type, $location, $greendot;
   global $message;
 
@@ -344,7 +381,7 @@ Types</span></td>
 <table border="0" width="99%">
 <form name="mainform" method="post" action="" autocomplete="off">
 <?
-  hiddenValue('passphrase'); echo "\n";
+  hiddenValue('session'); echo "\n";
   hiddenValue('folderkv'); echo "\n";
   hiddenValue('valueskv');
   echo '<input type="hidden" name="zip" value="' . $qty . '"/>' . "\n";
@@ -360,9 +397,10 @@ Types</span></td>
   echo "<td>";
   if ($greendot != $folder_name) echo "<b>$folder_name</b>";
   else {
-    echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . $folder_name . '"/><br/>' . "\n";
-    echo '<input type="submit" name="savename" value="Save"/>';
-    echo '<input type="submit" name="cancel" value="Cancel"/>';
+    echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . hsc($folder_name) . '"/><br/>' . "\n";
+    echo '<input type="hidden" name="oldname" value="' . hsc($folder_name) . '"/>' . "\n";
+    echo '<input type="submit" name="savename" value="Save"/>' . "\n";
+    echo '<input type="submit" name="cancel" value="Cancel"/>' . "\n";
   }
   echo "</td></tr>\n";
   $locs = $folder['locs'];
@@ -375,17 +413,22 @@ Types</span></td>
       echo "<td>";
       if ($greendot != $name) echo $name;
       else {
-        echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . $name . '"/><br/>' . "\n";
-        echo '<input type="submit" name="savename" value="Save"/>';
-        echo '<input type="submit" name="cancel" value="Cancel"/>';
+        echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . hsc($name) . '"/><br/>' . "\n";
+        echo '<input type="hidden" name="oldname" value="' . hsc($name) . '"/>' . "\n";
+        echo '<input type="submit" name="savename" value="Save"/>' . "\n";
+        echo '<input type="submit" name="cancel" value="Cancel"/>' . "\n";
         echo "&nbsp;&nbsp;";
-        echo '<input type="submit" name="delete" value="Delete..."/><br/>';
+        echo '<input type="submit" name="delete" value="Delete..."/><br/>' . "\n";
         echo '</td></tr><tr><td colspan="2"><span class="mono">' . "<b>$loc</b></span><br/>\n";
       }
       echo "</td></tr>\n";
     }
   }
-?><tr><td colspan="2"><input type="submit" name="add_location" value="Add Location"/></td></tr>
+  if ($message != '') {
+    echo '<tr><td colspan="2" class="alarm">' . hsc($message) . "</td></tr>\n";
+  }
+?>
+<tr><td colspan="2"><input type="submit" name="add_location" value="Add Location"/></td></tr>
 </table>
 
 <p>Click the green dot by a folder name to see its hex value, or to rename or delete it.</p>
@@ -393,26 +436,37 @@ Types</span></td>
 }
 
 function login() {
+  global $folder, $folder_name, $folder_loc;
+
+  if ($folder == '') return refreshFolder();
+  $folder_name = $folder['name'];
+  $folder_loc = $folder['loc'];
+  return TRUE;
+}
+
+function refreshFolder() {
   global $client, $passphrase, $session;
   global $folder, $folderkv, $folder_name, $folder_loc;
 
   $loc = FALSE;
-  if ($folder == '') {
-    if ($session != '') {
-      $res = $client->touch_archive($session, $url);
-      if ($res['status'] == 'success') $loc = $res['content'];
-    }
-    if (!$loc) {
-      if ($passphrase != '') {
-        $loc = $client->hash2location($client->sha256($passphrase));
-        $session_loc = $client->folderSession($loc);
-      } else return FALSE;
-    }
-    $res = $client->touch_archive($loc, $url);
-    if ($res['status'] != 'success') return FALSE;
-    $folder = $client->parseFolder($loc, $res['content']);
-    $folderkv = $client->array2kv($folder);
+
+  if ($session != '') {
+    $res = $client->touch_archive($session, $url);
+    if ($res['status'] == 'success') $loc = $res['content'];
   }
+
+  if (!$loc) {
+    if ($passphrase != '') {
+      $loc = $client->hash2location($client->sha256($passphrase));
+      $session = $client->folderSession($loc);
+    } else return FALSE;
+  }
+
+  $res = $client->touch_archive($loc, $url);
+  if ($res['status'] != 'success') return FALSE;
+  $folder = $client->parseFolder($loc, $res['content']);
+  $folderkv = $client->array2kv($folder);
+
   $folder_name = $folder['name'];
   $folder_loc = $folder['loc'];
   return TRUE;
@@ -478,3 +532,20 @@ function scanFolder($folder) {
   }
   return $values;
 }
+
+
+// Copyright 2008 Bill St. Clair
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions
+// and limitations under the License.
+
+?>

@@ -90,6 +90,7 @@ $title = "Loom Folder";
 
 if ($page == 'main') doMain();
 elseif ($page == 'locations') doLocations();
+elseif ($page == 'logout') doLogout();
 
 drawHead();
 
@@ -193,6 +194,16 @@ function makeCiphers() {
       $session_cipher = new Cipher($session_key);
     }
   }
+}
+
+function doLogout() {
+  global $page, $folderkv, $valueskv;
+  global $client, $session;
+
+  $page = 'login';
+  $folderkv = '';
+  $valueskv = '';
+  $client->logout($session);
 }
 
 function drawHead() {
@@ -313,7 +324,8 @@ function drawTail() {
 function drawLogin() {
 
 ?>
-<p>Welcome to Loom for iPhone. Note that in order to use this
+<p>Welcome to
+<a href="https://loom.cc/">Loom</a> for iPhone. Note that in order to use this
 confidently, you must trust that the PHP scripts at billstclair.com do
 not steal your passphrase. I promise that unless somebody hacks my
 site, the code running is what you can download from
@@ -332,9 +344,11 @@ me.</p>
 </tr>
 </table>
 <p>Because my SSL certificate is from
-<a href="http://cacert.org/">CAcert.org</a>, a free certificate authority (CA), you'll see a warning message on your iPhone when you come here: "The certificate for this website is invalid..." Click the "Continue" button to go ahead. Your regular browser should allow you to easily add the CA certificate to eliminate warnings, but the iPhone browser does not.</p>
+<a href="http://www.cacert.org/">CAcert.org</a>, a free certificate authority (CA), you'll see a warning message on your iPhone when you come here: "The certificate for this website is invalid..." Click the "Continue" button to go ahead. Your regular browser should allow you to easily add the CA certificate to eliminate warnings, but the iPhone browser does not.</p>
 
-<p>One way to use this, without giving me the keys to your kingdom, is to create a separate "Mobile" folder in Loom. Transfer assets that you think you might need on the road to a drop-point shared between your main folder and the "Mobile" folder, and only aim this page at the "Mobile" folder. You can always login to your main folder directly via loom.cc, if you need something there. The regular interface isn't as convenient as this one, but it works on the mobile browser.</p>
+<p>One way to use this, without giving me the keys to your kingdom, is to create a separate "Mobile" folder in Loom. Transfer assets that you think you might need on the road to a drop-point shared between your main folder and the "Mobile" folder, and only aim this page at the "Mobile" folder. You can always login to your main folder directly via
+<a href="https://loom.cc/">
+loom.cc</a>, if you need something there. The regular interface isn't as convenient as this one, but it works on the mobile browser.</p>
 </form>
 <?
 }
@@ -400,8 +414,9 @@ function drawMain() {
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
 <a href="javascript:submitPage('locations');">Locations</a>
-<!--&nbsp;
-Types--></span></td>
+&nbsp;
+<a href="javascript:submitPage('logout');">Logout</a>
+</span></td>
 </tr>
 </table>
 <?
@@ -481,8 +496,9 @@ function drawLocations() {
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
 &nbsp;
 Locations
-<!--&nbsp;
-Types--></span></td>
+&nbsp;
+<a href="javascript:submitPage('logout');">Logout</a>
+</span></td>
 </tr>
 </table>
 <table border="0" width="99%">

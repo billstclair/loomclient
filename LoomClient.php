@@ -370,13 +370,20 @@ class LoomClient
   // I'll wait for Patrick to make a KV-returning version,
   // instead of attempting to parse the returned HTML
   function renameFolderLocation($session, $oldname, $newname) {
-    $res = $this->rawget(array('function' => 'folder_locations',
-                                'session' => $session,
-                                'old_name' => $oldname,
-                                'new_name' => $newname,
-                                'save' => 'Save'),
+    return $this->rawget(array('function' => 'folder_locations',
+                               'session' => $session,
+                               'old_name' => $oldname,
+                               'new_name' => $newname,
+                               'save' => 'Save'),
                          $url);
-    return $res;
+  }
+
+  // Logout from Loom, destroying the old session
+  function logout($session) {
+    return $this->rawget(array('function' => 'folder',
+                               'logout' => '1',
+                               'session' => $session),
+                         $url);
   }
 
   function parsekv($kv, $recursive=FALSE) {

@@ -331,10 +331,10 @@ me.</p>
 <td><input type="submit" name="login" text="Login" /></td>
 </tr>
 </table>
-<p>It can take 10 or 20 seconds to read the initial values of all your
-folder's locations, more if you have lots of locations and asset
-types. Please be patient. After the initial load, things should be
-pretty quick.</p>
+<p>Because my SSL certificate is from
+<a href="http://cacert.org/">CAcert.org</a>, a free certificate authority (CA), you'll see a warning message on your iPhone when you come here: "The certificate for this website is invalid..." Click the "Continue" button to go ahead. Your regular browser should allow you to easily add the CA certificate to eliminate warnings, but the iPhone browser does not.</p>
+
+<p>One way to use this, without giving me the keys to your kingdom, is to create a separate "Mobile" folder in Loom. Transfer assets that you think you might need on the road to a drop-point shared between your main folder and the "Mobile" folder, and only aim this page at the "Mobile" folder. You can always login to your main folder directly via loom.cc, if you need something there. The regular interface isn't as convenient as this one, but it works on the mobile browser.</p>
 </form>
 <?
 }

@@ -2,6 +2,8 @@
 
 require_once "Socket.php";
 require_once "LoomClient.php";
+require_once "Cipher.php";
+require_once "bcbitwise.php";
 
   /*
    * iPhone interface to the Loom folder.
@@ -36,6 +38,29 @@ $delete = mq($_POST['delete']);
 $add_location = mq($_POST['add_location']);
 
 $client = new LoomClient();
+
+// Redefine $encrypt_key if you want to use one.
+// It should be a 32-character hex string, as generated
+// by the grid-tutotial.php "Tools" page.
+$client->disable_warnings();
+$encrypt_key = '';
+include "ip-config.php";
+$client->reenable_warnings();
+
+$cipher = '';
+$session_cipher = '';
+
+if ($encrypt_key != '') {
+  makeCiphers();
+  if ($session_cipher != '') {
+    if ($folderkv != '') {
+      $folderkv = $session_cipher->decrypthex($folderkv);
+    }
+    if ($valueskv != '') {
+      $valueskv = $session_cipher->decrypthex($valueskv);
+    }
+  }
+}
 
 $onload = 'zip';
 $folder = '';
@@ -154,6 +179,20 @@ function doLocations() {
     $page = 'add_location';
   }
 
+}
+
+function makeCiphers() {
+  global $cipher, $encrypt_key, $session, $session_cipher;
+  if ($encrypt_key != '') {
+    if ($cipher == '') {
+      $cipher = new Cipher($encrypt_key);
+      if ($session != '') $session = $cipher->decrypthex($session);
+    }
+    if ($session_cipher == '' && $session != '') {
+      $session_key = bcxorhex($session, $encrypt_key);
+      $session_cipher = new Cipher($session_key);
+    }
+  }
 }
 
 function drawHead() {
@@ -330,6 +369,24 @@ function drawValues($name, $typevalues) {
   }
 }
 
+function writeSessionInfo() {
+  global $cipher, $session_cipher;
+  global $session, $folderkv, $valueskv;
+
+  $enc_session = $session;
+  $enc_folderkv = $folderkv;
+  $enc_valueskv = $valueskv;
+
+  if ($cipher) $enc_session = $cipher->encrypt2hex($enc_session);
+  if ($session_cipher) {
+    $enc_folderkv = $session_cipher->encrypt2hex($enc_folderkv);
+    $enc_valueskv = $session_cipher->encrypt2hex($enc_valueskv);
+  }
+  echo '<input type="hidden" name="session" value="' . hsc($enc_session) . '"/>' . "\n";
+  echo '<input type="hidden" name="folderkv" value="' . hsc($enc_folderkv) . '"/>' . "\n";
+  echo '<input type="hidden" name="valueskv" value="' . hsc($enc_valueskv) . '"/>' . "\n";
+}
+
 function drawMain() {
   global $session, $folder, $values, $folder_name;
   global $qty, $type, $location;
@@ -353,9 +410,7 @@ Types--></span></td>
 <table border="0" width="99%">
 <form name="mainform" method="post" action="" autocomplete="off">
 <?
-hiddenValue('session'); echo "\n";
-hiddenValue('folderkv'); echo "\n";
-hiddenValue('valueskv');
+writeSessionInfo();
 hiddenValue('page');
 ?>
 <tr>
@@ -433,9 +488,7 @@ Types--></span></td>
 <table border="0" width="99%">
 <form name="mainform" method="post" action="" autocomplete="off">
 <?
-  hiddenValue('session'); echo "\n";
-  hiddenValue('folderkv'); echo "\n";
-  hiddenValue('valueskv');
+  writeSessionInfo();
   echo '<input type="hidden" name="zip" value="' . $qty . '"/>' . "\n";
   hiddenValue('type');
   hiddenValue('location');
@@ -493,9 +546,7 @@ function drawAddLocation() {
 ?>
 <form name="entryForm" method="post" action=""><b>
 <?
-hiddenValue('session'); echo "\n";
-hiddenValue('folderkv'); echo "\n";
-hiddenValue('valueskv');
+writeSessionInfo();
 hiddenValue('page');
 ?>
 Enter name:<br/>
@@ -560,6 +611,7 @@ function refreshFolder() {
     if ($passphrase != '') {
       $loc = $client->hash2location($client->sha256($passphrase));
       $session = $client->folderSession($loc);
+      makeCiphers();
     } else return FALSE;
   }
 

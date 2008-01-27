@@ -382,15 +382,13 @@ class LoomClient
   // I'll wait for Patrick to make a KV-returning version,
   // instead of attempting to parse the returned HTML
   function newFolderLocation($session, $newname, $newlocation) {
-    $res = $this->rawget(array('function' => 'folder_locations',
+    return $this->rawget(array('function' => 'folder_locations',
                                'session' => $session,
                                'add_location' => '1',
                                'loc' => $newlocation,
                                'nickname' => $newname,
                                'save' => 'Save'),
                          $url);
-    echo "$url<br>\n";
-    return $res;
   }
 
   // Logout from Loom, destroying the old session

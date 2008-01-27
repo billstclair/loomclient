@@ -202,12 +202,13 @@ function makeCiphers() {
 
 function doAddLocation() {
   global $session, $commit, $page, $newname, $newlocation;
-  global $client, $message;
+  global $client, $message, $folder;
 
   $page = 'locations';
 
   if ($commit != 'commit') $message = 'Cancelled';
   else if ($newname == '') $message = 'Blank name';
+  else if ($folder['locs'][$newname] != '') $message = "Name already exists";
   else if ($newlocation != '' && !$client->isValidID($newlocation)) {
     $message = 'Invalid location ID';
   } else {

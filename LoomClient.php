@@ -378,6 +378,21 @@ class LoomClient
                          $url);
   }
 
+  // This doesn't yet test that it worked.
+  // I'll wait for Patrick to make a KV-returning version,
+  // instead of attempting to parse the returned HTML
+  function newFolderLocation($session, $newname, $newlocation) {
+    $res = $this->rawget(array('function' => 'folder_locations',
+                               'session' => $session,
+                               'add_location' => '1',
+                               'loc' => $newlocation,
+                               'nickname' => $newname,
+                               'save' => 'Save'),
+                         $url);
+    echo "$url<br>\n";
+    return $res;
+  }
+
   // Logout from Loom, destroying the old session
   function logout($session) {
     return $this->rawget(array('function' => 'folder',
@@ -566,6 +581,11 @@ class LoomClient
       if ($this->isLocationVacant($type, $id)) return $id;
     }
     return false;
+  }
+
+  // Test that an ID is a valid 32-character hex string
+  function isValidID($id) {
+    return (strlen($id) == 32) && preg_match('/[a-f0-9]{32}/', $id);
   }
 
 } // End of LoomClient class

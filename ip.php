@@ -36,6 +36,7 @@ $newlocation = mq($_POST['newlocation']);
 $savename = mq($_POST['savename']);
 $delete = mq($_POST['delete']);
 $add_location = mq($_POST['add_location']);
+$commit = mq($_POST['commit']);
 
 $client = new LoomClient();
 
@@ -90,6 +91,7 @@ $title = "Loom Folder";
 
 if ($page == 'main') doMain();
 elseif ($page == 'locations') doLocations();
+elseif ($page == 'add_location') doAddLocation();
 elseif ($page == 'logout') doLogout();
 
 drawHead();
@@ -127,10 +129,12 @@ function doMain() {
     $transferred = TRUE;
     if ($count != '' && $id != '' && $loc != '') {
       if ($take != '') {
+        $client->buy($id, $folder_loc, $folder_loc, $url);
         $res = $client->move($id, $count, $loc, $folder_loc, $url);
         $loc_orig = $location;
         $loc_dest = $folder_name;
       } else if ($give != '') {
+        $client->buy($id, $loc, $folder_loc, $url);
         $res = $client->move($id, $count, $folder_loc, $loc, $url);
         $loc_dest = $location;
         $loc_orig = $folder_name;
@@ -196,6 +200,24 @@ function makeCiphers() {
   }
 }
 
+function doAddLocation() {
+  global $session, $commit, $page, $newname, $newlocation;
+  global $client, $message;
+
+  $page = 'locations';
+
+  if ($commit != 'commit') $message = 'Cancelled';
+  else if ($newname == '') $message = 'Blank name';
+  else if ($newlocation != '' && !$client->isValidID($newlocation)) {
+    $message = 'Invalid location ID';
+  } else {
+    if ($newlocation == '') $newlocation = $client->random->random_id();
+    $client->newFolderLocation($session, $newname, $newlocation);
+    fullRefresh();
+    $message = "Location created: $newname";
+  }
+}
+
 function doLogout() {
   global $page, $folderkv, $valueskv;
   global $client, $session;
@@ -229,9 +251,10 @@ function hideAddressbar() {
   window.scrollTo(0, 1);
 }
 
-addEventListener("load", function() {
-  setTimeout(hideAddressbar, 0);
-}, false);
+function doOnLoad(selected) {
+  selected.select();
+  setTimeout(hideAddressbar, 250);
+}
 
 <? additionalHTMLScripts(); ?>
 
@@ -273,7 +296,7 @@ A.name_dot { font-size:16pt; font-weight:bold; color:green; }
 </style>
 
 </head>
-<body onload="document.forms[0].<? echo $onload; ?>.select()">
+<body onload="doOnLoad(document.forms[0].<? echo $onload; ?>)">
 <table width="320px">
 <tr><td>
 <?
@@ -308,7 +331,11 @@ function DoBksp(form)
   form.newlocation.value  = T2;
 }
 function DoClr(form)  { form.newlocation.value = ""; }
-function DoEnter(form)  { document.entryForm.submit(); }
+function DoEnter(form)  { form.submit(); }
+function DoCancel(form)  {
+  form.commit.value = 'Cancel';
+  form.submit();
+}
 <?
   }
 }
@@ -323,13 +350,16 @@ function drawTail() {
 
 function drawLogin() {
 
+  $host = $_SERVER["HTTP_HOST"];
+  if (!$host || $host == '') $host = $_SERVER["SERVER_NAME"];
+
 ?>
 <p>Welcome to
 <a href="https://loom.cc/">Loom</a> for iPhone. Note that in order to use this
-confidently, you must trust that the PHP scripts at billstclair.com do
+confidently, you must trust that the PHP scripts at <? echo $host; ?> do
 not steal your passphrase. I promise that unless somebody hacks my
 site, the code running is what you can download from
-<a href="index.html">here</a>, but don't trust that unless you know
+<a href="./">here</a>, but don't trust that unless you know
 me.</p>
 <form method="post" action="" autocomplete="off">
 <input type="hidden" name="page" value="main"/>
@@ -508,6 +538,8 @@ Locations
   echo '<input type="hidden" name="zip" value="' . $qty . '"/>' . "\n";
   hiddenValue('type');
   hiddenValue('location');
+  hiddenValue('newname');
+  hiddenValue('newlocation');
   hiddenValue('page');
 ?>
 <input type="hidden" name="greendot" value=""/>
@@ -558,12 +590,16 @@ Locations
 
 function drawAddLocation() {
   global $newname, $newlocation;
+  global $commit;
+
+  $commit = 'commit';
 
 ?>
 <form name="entryForm" method="post" action=""><b>
 <?
 writeSessionInfo();
 hiddenValue('page');
+hiddenValue('commit');
 ?>
 Enter name:<br/>
 <input type="text" name="newname" style="font-size: 14pt;" size="25" value="<? echo $newname; ?>"/><br/>
@@ -599,6 +635,7 @@ Enter Location, blank for random:<br/>
 <input type="button" style="font-size: 18pt;" value="Del" onClick="DoBksp(this.form)">
 <input type="button" style="font-size: 18pt;" value="Clr" onClick="DoClr(this.form)">
 <input type="button" style="font-size: 18pt;" value="Enter" onClick="DoEnter(this.form)"><br/>
+<input type="button" style="font-size: 18pt;" value="Cancel" onClick="DoCancel(this.form)"><br/>
 </b></form>
 <?
 }

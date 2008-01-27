@@ -336,6 +336,17 @@ function DoCancel(form)  {
   form.commit.value = 'Cancel';
   form.submit();
 }
+function submitOnRet(e, form) {
+  var keynum;
+  var keychar;
+  if (window.event) keynum = e.keyCode; // IE
+  else if (e.which) keynum = e.which;   // Netscape/Firefox/Opera
+  keychar = String.fromCharCode(keynum);
+  if (keychar != "\n" && keychar != "\r") return true;
+  DoEnter(form);
+  return false;
+}
+</script>
 <?
   }
 }
@@ -602,9 +613,9 @@ hiddenValue('page');
 hiddenValue('commit');
 ?>
 Enter name:<br/>
-<input type="text" name="newname" style="font-size: 14pt;" size="25" value="<? echo $newname; ?>"/><br/>
+<input type="text" name="newname" style="font-size: 14pt;" size="25" value="<? echo $newname; ?>" onkeydown="submitOnRet(event, this.form)"/><br/>
 Enter Location, blank for random:<br/>
-<input type="text" style="font-size: 11pt;" size="32" name="newlocation" value="<? echo $newlocation; ?>"/>
+<input type="text" style="font-size: 11pt;" size="32" name="newlocation" value="<? echo $newlocation; ?>" onkeydown="submitOnRet(event, this.form)"/>
 <table>
 <tr>
 <td><input type="button" style="font-size: 18pt;" value="7" onClick="Do7(this.form)"></td>

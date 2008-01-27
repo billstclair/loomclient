@@ -184,6 +184,8 @@ function doLocations() {
     $page = 'add_location';
   }
 
+  else refreshFolder();
+
 }
 
 function makeCiphers() {
@@ -453,7 +455,7 @@ function drawMain() {
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
-<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
 <a href="javascript:submitPage('locations');">Locations</a>
 &nbsp;
@@ -535,9 +537,9 @@ function drawLocations() {
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
-<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: bold; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
 &nbsp;
-Locations
+<a href="javascript:submitPage('locations');"><b>Locations</b></a>
 &nbsp;
 <a href="javascript:submitPage('logout');">Logout</a>
 </span></td>

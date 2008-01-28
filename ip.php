@@ -387,8 +387,8 @@ me.</p>
 <td><input type="submit" name="login" text="Login" /></td>
 </tr>
 </table>
-<p>Because my SSL certificate is from
-<a href="http://www.cacert.org/">CAcert.org</a>, a free certificate authority (CA), you'll see a warning message on your iPhone when you come here: "The certificate for this website is invalid..." Click the "Continue" button to go ahead. Your regular browser should allow you to easily add the CA certificate to eliminate warnings, but the iPhone browser does not.</p>
+<p>Because my SSL certificate is a $20/year cheapie from
+<a href="http://www.godaddy.com/">GoDaddy.com</a>, you'll see a warning message on your iPhone when you come here: "The certificate for this website is invalid..." Click the "Continue" button to go ahead. Your regular browser should allow you to easily add the CA certificate to eliminate warnings, but the iPhone browser does not. In any case, your connection to my web site will be encrypted.</p>
 
 <p>One way to use this, without giving me the keys to your kingdom, is to create a separate "Mobile" folder in Loom. Transfer assets that you think you might need on the road to a drop-point shared between your main folder and the "Mobile" folder, and only aim this page at the "Mobile" folder. You can always login to your main folder directly via
 <a href="https://loom.cc/">

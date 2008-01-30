@@ -238,6 +238,7 @@ function drawHead() {
 <head>
 <meta name="viewport" content="width=device-width" user-scalable="no" minimum-scale="1.0" maximum-scale="1.0"/>
 <title><? echo $title; ?></title>
+<link rel="apple-touch-icon" href="krugerand.png"/>
 
 <script language="JavaScript">
 function submitPage(page) {

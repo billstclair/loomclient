@@ -40,6 +40,7 @@ function maybe_echo_server($q) {
 <html>
 <head>
 <title>Loom Grid &amp; Archive Tutorials in PHP</title>
+<link rel="shortcut icon" href="krugerand.png"/>
 <style type="text/css">
 body { font-family: verdana, arial, sans-serif; font-size: 10pt }
 div { font-size:10pt }

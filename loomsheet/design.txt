@@ -4,9 +4,9 @@
 
 This file is designed to be edited with Emacs. The lines beginning with asterisks define an outline structure. Table mode (table-recognize near the end of the file) makes editing the tables fairly easy.
 
-* Loomware Concept
+* Loomsheet Concept
 
-Loomware is a personal information manager with synchronization to external sources. The basic unit of information is the table, a table has rows & columns, and properties, including a current sort. Columns in a table have a label, a type, and a source. The type and the source control how the value in a cell is synchronized with the world outside of Loomware.
+Loomsheet is a personal information manager with synchronization to external sources. The basic unit of information is the table, a table has rows & columns, and properties, including a current sort. Columns in a table have a label, a type, and a source. The type and the source control how the value in a cell is synchronized with the world outside of Loomsheet.
 
 ** Example
 
@@ -52,7 +52,7 @@ Exchange rate tables need to be synchronized with reality, using a web service, 
 
 Some tables are synchronized by computations based on the values of other tables. Adding a "Dollar Value" column to your Loom folder, could multiply the value by the dollars/asset of the asset type.
 
-The entire system is really a big, multi-page spreadsheet, where values can change based on synchronization with external sources, and be propogated around.
+The entire system is really a big, multi-page spreadsheet, where values can change based on synchronization with external sources, and be propogated around. Hence the name, Loom + spreadsheet = Loomsheet.
 
 ** Commands
 
@@ -96,7 +96,7 @@ Uses GDBM for persistence, like Loom itself. http://www.gnu.org/software/gdbm/
 
 * Programming language
 
-Python. It's nice, supports GDBM, and has a portable GUI: http://wxpython.org/ . I'd actually prefer Lisp, but it isn't as well known and doesn't, yet, have a portable GUI. I could also use Java, but Java development isn't interactive enough, nor is its GUI easy to use.
+Python. It's nice, supports GDBM, and has a portable GUI: http://wxpython.org/ . I'd actually prefer Lisp, but it isn't as well known and doesn't, yet, have a portable GUI, unless I were to port wxWidgets myself. I could also use Java, but Java development isn't interactive enough, nor is its GUI as easy to use.
 
 * Emacs control cruft
 

@@ -1,0 +1,127 @@
+;-*- mode: Outline; fill-column: 80; -*-
+
+* Note
+
+This file is designed to be edited with Emacs. The lines beginning with asterisks define an outline structure. Table mode (table-recognize near the end of the file) makes editing the tables fairly easy.
+
+* Loomware Concept
+
+Loomware is a personal information manager with synchronization to external sources. The basic unit of information is the table, a table has rows & columns, and properties, including a current sort. Columns in a table have a label, a type, and a source. The type and the source control how the value in a cell is synchronized with the world outside of Loomware.
+
+** Example
+
+Here's a depiction in table form of a Loom folder. Note that this can support multiple folders in a single view.
+
++-------------------+----------------------+---------------------+-----------+
+|      FOLDER       |       LOCATION       |        ASSET        |   VALUE   |
++-------------------+----------------------+---------------------+-----------+
+| Bill St. Clair    | Bill St. Clair       | GoldNow GoldGrams   | 20.700    |
++-------------------+----------------------+---------------------+-----------+
+| Bill St. Clair    | Bill St. Clair       | Usage Tokens        | 30        |
++-------------------+----------------------+---------------------+-----------+
+| Bill St. Clair    | Safe                 | GoldNow GoldGrams   | 200.000   |
++-------------------+----------------------+---------------------+-----------+
+| Bill St. Clair    | Safe                 | Patrick GoldGrams   | 50.000    |
++-------------------+----------------------+---------------------+-----------+
+
+In practice, when a table is sorted canonically, by column from left to right, the repeated values in a column are ommitted from the display, but this is an option:
+
++-------------------+----------------------+---------------------+-----------+
+|      FOLDER       |       LOCATION       |        ASSET        |   VALUE   |
++-------------------+----------------------+---------------------+-----------+
+| Bill St. Clair    | Bill St. Clair       | GoldNow GoldGrams   | 20.700    |
++-------------------+----------------------+---------------------+-----------+
+|                   |                      | Usage Tokens        | 30        |
++-------------------+----------------------+---------------------+-----------+
+|                   | Safe                 | GoldNow GoldGrams   | 200.000   |
++-------------------+----------------------+---------------------+-----------+
+|                   |                      | Patrick GoldGrams   | 200.000   |
++-------------------+----------------------+---------------------+-----------+
+
+Conditionally omitting rows from the display is an option. For example, both tables above omit the zero value for "Patrick GoldGrams" from the "Bill St. Clair" location.
+
+Conditionally omitting columns is also supported. The FOLDER and LOCATION columns values above are really just the assigned labels for Loom 128-bit locations and the ASSET column values are labels for 128-bit asset IDs. Those 32-char hex values are in the table, or an associated table, as additional columns, and are used to synchronize the user labels, but are not shown.
+
+** Synchronization
+
+There are a number of types of synchronization.
+
+Loom Folder values, stored locally, need to be synchronized with the actual values from Loom, and discrepancies reported, likely with a mode to parse the Loom transaction log, if there, and accept differences that are accountable there. This recognizes when a location has been discovered, but the folder itself has not been compromised.
+
+Exchange rate tables need to be synchronized with reality, using a web service, or HTML parser. This reveals the need for automatic periodic synchronization, and table properties to record them. Also, some column types are synchronized wherever they appear.
+
+Some tables are synchronized by computations based on the values of other tables. Adding a "Dollar Value" column to your Loom folder, could multiply the value by the dollars/asset of the asset type.
+
+The entire system is really a big, multi-page spreadsheet, where values can change based on synchronization with external sources, and be propogated around.
+
+** Commands
+
+There need to be a number of different ways of manipulating the tables. Here are a few examples:
+
+*** Direct Entry
+
+Many of the cell values are plain old text. An address book, for example (synchronized, of course, with the built-in address book app on your computer).
+
+*** Rename
+
+The Labels on locations and asset types can be changed. Right-click on a name, select "Rename" from the pop-up menu, and type a new label.
+
+*** Transfer
+
+Move an asset from one Loom location to another. Right-click on the origin row, select "Move" from the pop-up menu, type an amount, and click on the destination row. Confirmation if so configured, likely by default.
+
+*** Trade
+
+Transfer, plus a background task that looks for the other guy to do his side of the trade, and snarfs the returned value. Right click, select "Trade", type amount, select returned asset type, type expected return amount, and click the transfer location. There need to be multiple ways to do this, with good defaults for exchange rates. Notification tells you when the trade is complete and whether the expected value was returned. There is a way to show all uncompleted trades.
+
+*** Search
+
+Apple Spotlight-style search in single tables and system-wide, with advanced search allowing specification of column names/types to look in.
+
+*** Join
+
+Two tables can be joined along one or more columns. Changes to the slave (lookup) table appear automatically in any master tables. The folder tables above really contain only the 32-char hex locations and asset IDs. The labels are looked up.
+
+*** Other Standard Table Operations
+
+Reorder columns, hide/show columns, sort, statistics, Comma-separated value import & export
+
+* Encryption
+
+Everything is encrypted with a database passphrase. Changing the passphrase is a pain to implement, but is supported (write a new copy of the database, encrypted with the new passphrase, and switch to it). A blank passphrase, disabling encryption, is possible, though discouraged. There is a tension between encryption and fast search. An encrypted word index, held in RAM during use, and periodically saved, is a likely solution.
+
+* Database
+
+Uses GDBM for persistence, like Loom itself. http://www.gnu.org/software/gdbm/
+
+* Programming language
+
+Python. It's nice, supports GDBM, and has a portable GUI: http://wxpython.org/ . I'd actually prefer Lisp, but it isn't as well known and doesn't, yet, have a portable GUI. I could also use Java, but Java development isn't interactive enough, nor is its GUI easy to use.
+
+* Emacs control cruft
+
+** Note
+
+If you do longlines-mode as "mode: longlines", instead of evaluating "(longlines-mode)" after the evaluation of (table-recognize), it wraps the tables. Don't know why. Add to your .emacs file a seting of safe-local-eval-forms to '((table-recognize) (longlines-mode)) to prevent the safe variable query when you open this file.
+
+** Settings
+
+;; Local Variables: **
+;; eval: (table-recognize) **
+;; eval: (longlines-mode) **
+;; End: **
+
+* Copyright 2008 Bill St. Clair
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+See the License for the specific language governing permissions
+and limitations under the License.

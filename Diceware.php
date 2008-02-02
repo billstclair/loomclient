@@ -1,6 +1,7 @@
 <?php
 
 require_once "LoomRandom.php";
+require_once "bcbitwise.php";
 
   /*
    * Roll dice to generate random passphrases.
@@ -18,9 +19,7 @@ class Diceware {
     if (!$random) $random = new LoomRandom();
     $text = $this->rawtext();
     $words = explode("\n", $text);
-    // Assume < 2**16 words in list.
-    // Check for arithmetic overflow in random_word if you increase this
-    $bytes = 2;
+    $bytes = 32;                // 2**128 should be big enough, doncha think?
 
     $this->random = $random;
     $this->count = count($words);
@@ -35,9 +34,9 @@ class Diceware {
     $bits = $random->urandom_bytes($bytes);
     $words = $this->words;
 
-    // There must be an easier way to do this
-    $x = base_convert(bin2hex($bits), 16, 10);
-    return $words[floor(($x * $count) / pow(2, 8 * $bytes))];
+    $x = bchexdec(bin2hex($bits));
+    $wordnum = bcdiv(bcmul($x, $count), bcpow(2, 8 * $bytes), 0);
+    return $words[$wordnum];
   }
 
   function random_words($count) {

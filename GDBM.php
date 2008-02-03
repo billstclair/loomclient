@@ -87,8 +87,9 @@ class GDBM {
   }
 
   // Finish copying old to new, delete old, rename new to old, and reopen
-  function finishCopying($reopen=true) {
-    while ($this->newr) $this->copysome($reopen);
+  // Do NOT start copying again.
+  function finishCopying() {
+    while ($this->newr) $this->copysome(false);
   }
 
   // Close the database(s). Finish copying first if $finish_copying is true
@@ -164,7 +165,7 @@ class GDBM {
 /*
 if (file_exists('old.db')) unlink('old.db');
 if (file_exists('new.db')) unlink('new.db');
-$db = new GDBM('old.db', 'new.db');
+$db = new GDBM('old.db', 'new.db', 1);
 $cnt = 99;
 $loops = 10;
 for ($i=1; $i<=$cnt; $i++) {
@@ -186,7 +187,7 @@ for ($i=1; $i<=$cnt; $i++) {
   echo "$i: " . $db->get($i) . "\n";
   if (!$db->isCopying()) $db->startCopying();
 }
-$db->finishCopying(false);
+$db->finishCopying();
 $db->close();
 */
 

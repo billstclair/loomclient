@@ -10,6 +10,8 @@ function mq($x) {
 
 $file = mq($_GET['file']);
 $title = mq($_GET['title']);
+$numbers = mq($_GET['numbers']);
+$search = mq($_GET['search']);
 
 $file = trim($file);
 
@@ -32,14 +34,36 @@ if ($file == '') {
 
   $text = htmlspecialchars(file_get_contents($file));
 
-  // Add paragraph breaks
-  $text = str_replace("\n\n", "\n<p>\n", $text);
+  // Do search, if requested
+  if ($search != '') {
+    $i = 1;
+    // Escape special chars in the search string
+    $search = preg_replace("/([\\\\\\^\\$\\.\\[\\]\\|\\(\\)\\?\\*\\+\\{\\}])/", '\\\\$1', $search);
+    // Now replace instances of the search string
+    $text = preg_replace_callback('/' . $search . '/i', "searchBody", $text);
+    // Make the last match loop around
+    $text = str_replace('href="#' . $i . '">', 'href="#1">', $text);
+  }
+
+  // Add line numbers, if requested
+  if ($numbers != '') {
+    $lines = explode("\n", $text);
+    $cnt = count($lines);
+    $digits = strlen($cnt);
+    $format = "%0" . $digits . 'd';
+    $i = 1;
+    foreach ($lines as $idx => $line) {
+      if ($i < $cnt || $line != '') {
+        $lines[$idx] = '<a name="line' . $i . '" href="#line' . $i . '">' .
+          sprintf($format, $i) . '</a> ' . $line;
+      }
+      $i++;
+    }
+    $text = implode("\n", $lines);
+  }
 
   // Add line breaks
   $text = str_replace("\n", "<br>\n", $text);
-
-  // Get rid of the breaks just before paragraphs
-  $text = str_replace("<br>\n<p>", "\n<p>", $text);
 
   // Make spaces non-breaking
   $text = str_replace(" ", "&nbsp;", $text);
@@ -49,6 +73,11 @@ if ($file == '') {
 
   // Once more to get the remaining &nbsp; after single chars
   $text = preg_replace("/([^;])&nbsp;([^&])/", "$1 $2", $text);
+}
+
+function searchBody($match) {
+  global $i;
+  return '<a name="' . $i . '" href="#' . ++$i . '">' . $match[0] . '</a>';
 }
 
 ?>
@@ -68,6 +97,8 @@ if ($file != '') {
   echo "You may view the following files:<p>\n<ul>\n";
   foreach ($files as $line) echo $line;
   echo "</ul>\n";
+  echo '<p>Add "?search=foo" to search for foo' . "\n";
+  echo '<br>Add "?numbers=yes" to add line numbers' . "\n";
  }
 ?>
 </body>

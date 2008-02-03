@@ -161,6 +161,7 @@ class GDBM {
 }
 
 // Test code. Uncomment to run.
+/*
 if (file_exists('old.db')) unlink('old.db');
 if (file_exists('new.db')) unlink('new.db');
 $db = new GDBM('old.db', 'new.db');
@@ -187,6 +188,7 @@ for ($i=1; $i<=$cnt; $i++) {
 }
 $db->finishCopying(false);
 $db->close();
+*/
 
 // Copyright 2008 Bill St. Clair
 //

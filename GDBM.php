@@ -14,6 +14,7 @@ class GDBM {
 
   var $delete_flag;             // Leading char for deleted entry marker
   var $escape;                  // Escape character for $delete_flag and itself
+  var $lastkey_key;             // fetch here in $newr for $lastkey
 
   function GDBM($oldfile, $newfile, $copycount=10, $handler="gdbm") {
     $this->oldfile = $oldfile;
@@ -23,6 +24,9 @@ class GDBM {
 
     $this->delete_flag = 'X';
     $this->escape = '\\';
+
+    // Can't be a real key.
+    $this->lastkey_key = $this->delete_flag . $this->escape;
 
     $oldr = dba_open($oldfile, 'cl', $handler);
 
@@ -38,10 +42,7 @@ class GDBM {
 
     // Fetch where we left off last time
     if ($newr) {
-      $this->copykey = dba_fetch($newr, $this->delete_flag);
-
-      // If didn't leave off last time, fetch the first key in the old database
-      if (!$this->copykey) $this->copykey = dba_firstkey($oldr);
+      $this->lastkey = dba_fetch($newr, $this->lastkey_key);
     }
   }
 
@@ -100,6 +101,10 @@ class GDBM {
   }
 
   function copysome() {
+    // If didn't leave off last time, fetch the first key in the old database
+    $key = $this->lastkey;
+    if (!$key) $key = dba_firstkey($this->oldr);
+    else $key = dba_nextkey($this->oldr);
   }
 
   function isCopying() {

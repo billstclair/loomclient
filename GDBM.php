@@ -94,7 +94,7 @@ class GDBM {
 
   // Close the database(s). Finish copying first if $finish_copying is true
   function close($finish_copying=false) {
-    if ($finish_copying) finishCopying(false);
+    if ($finish_copying) $this->finishCopying();
     if ($this->oldr) {
       dba_close($this->oldr);
       $this->oldr = false;
@@ -131,8 +131,6 @@ class GDBM {
         else {
           // We're done copying.
           // Delete the old database, and rename new to old
-          // Could add a user-defined archive function, which would
-          // do something useful with the old database
           $this->close(false);
           $oldsize = filesize($this->oldfile);
           $newsize = filesize($this->newfile);
@@ -187,8 +185,7 @@ for ($i=1; $i<=$cnt; $i++) {
   echo "$i: " . $db->get($i) . "\n";
   if (!$db->isCopying()) $db->startCopying();
 }
-$db->finishCopying();
-$db->close();
+$db->close(true);
 */
 
 // Copyright 2008 Bill St. Clair

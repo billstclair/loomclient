@@ -102,7 +102,7 @@ Python. It's nice, supports GDBM, and has a portable GUI: http://wxpython.org/ .
 
 ** Note
 
-If you do longlines-mode as "mode: longlines", instead of evaluating "(longlines-mode)" after the evaluation of (table-recognize), it wraps the tables. Don't know why. Add to your .emacs file a seting of safe-local-eval-forms to '((table-recognize) (longlines-mode)) to prevent the safe variable query when you open this file.
+If you do longlines-mode as "mode: longlines", instead of evaluating "(longlines-mode)" after the evaluation of (table-recognize), it wraps the tables. Don't know why. Add to your .emacs file a setting of safe-local-eval-forms to '((table-recognize) (longlines-mode)) to prevent the safe variable query when you open this file.
 
 ** Settings
 

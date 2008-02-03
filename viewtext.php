@@ -77,7 +77,7 @@ if ($file == '') {
 
 function searchBody($match) {
   global $i;
-  return '<a name="' . $i . '" href="#' . ++$i . '">' . $match[0] . '</a>';
+  return '<a name="' . $i . '" href="#' . ++$i . '"><b>' . $match[0] . '</b></a>';
 }
 
 ?>

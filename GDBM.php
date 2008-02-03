@@ -124,25 +124,16 @@ class GDBM {
 
   // Copy $this->copycount keys from old to new database
   function copysome($reopen) {
-    for ($i=0; $i<$this->copycount; $i++) {
-      if ($this->newr) {
+    if ($this->newr) {
+      for ($i=0; $i<$this->copycount; $i++) {
         $key = dba_firstkey($this->oldr);
         if ($key) $this->copyone($key);
         else {
           // We're done copying.
-          // Delete the old database, and rename new to old
-          $this->close(false);
-          $oldsize = filesize($this->oldfile);
-          $newsize = filesize($this->newfile);
-          $this->error = "old size: $oldsize, new size: $newsize";
-          if (unlink($this->oldfile)) {
-            if (rename($this->newfile, $this->oldfile)) {
-              if ($reopen) $this->reopen();
-            } else $this->error = "Could not rename new file to old file";
-          } else $this->error = "Could not unlink old file";
+          $this->flipDBS($reopen);
           return;
         }
-      } else return;
+      }
     }
   }
 
@@ -155,6 +146,19 @@ class GDBM {
       }
       dba_delete($key, $this->oldr);
     }
+  }
+
+  // Delete the old database, and rename new to old
+  function flipDBs($reopen) {
+    $this->close(false);
+    $oldsize = filesize($this->oldfile);
+    $newsize = filesize($this->newfile);
+    $this->error = "old size: $oldsize, new size: $newsize";
+    if (unlink($this->oldfile)) {
+      if (rename($this->newfile, $this->oldfile)) {
+        if ($reopen) $this->reopen();
+      } else $this->error = "Could not rename new file to old file";
+    } else $this->error = "Could not unlink old file";
   }
 
 }

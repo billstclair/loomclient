@@ -5,7 +5,7 @@
 class GDBM {
 
   var $oldfile;                 // The name of the "Old" file
-  var $newfile;                 // The name of hte "New" file
+  var $newfile;                 // The name of the "New" file
   var $oldr;                    // Resource pointer for $oldfile
   var $newr;                    // Resource pointer for $newfile
   var $copycount;               // Number of keys to copy per access

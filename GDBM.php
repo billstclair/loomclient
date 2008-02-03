@@ -96,6 +96,20 @@ class GDBM {
     return $value;
   }
 
+  function startCopying() {
+  }
+
+  function copysome() {
+  }
+
+  function isCopying() {
+  }
+
+  function finishCopying() {
+  }
+
+  function close() {
+  }
 
 }
 

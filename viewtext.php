@@ -20,6 +20,7 @@ if ($title == '') $title = $file;
 $files = explode("\n", file_get_contents('viewtext.txt'));
 
 if ($file == '') {
+  if ($title == '') $title = "Text Viewer";
   foreach($files as $idx => $line) {
     if ($line != '') {
       $files[$idx] = "<li><a href=\"?file=$line\">$line</a></li>\n";

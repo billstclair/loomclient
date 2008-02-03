@@ -41,13 +41,13 @@ class GDBM {
   // If the deleted key is in the new database, return false.
   // Otherwise, return the value in the old databae.
   function get($key) {
-    $res = false;
+    $value = false;
     if ($this->newr) {
       $this->copysome(true);
-      if ($this->newr) $res = dba_fetch($key, $this->newr);
+      if ($this->newr) $value = dba_fetch($key, $this->newr);
     }
-    if (!$res) $res = dba_fetch($key, $this->oldr);
-    return $res;
+    if (!$value) $value = dba_fetch($key, $this->oldr);
+    return $value;
   }
 
   // Replace or set the value of $key to $value.

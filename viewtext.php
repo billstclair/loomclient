@@ -38,7 +38,7 @@ if ($file == '') {
   if ($search != '') {
     $i = 1;
     // Escape special chars in the search string
-    $search = preg_replace("/([\\\\\\^\\$\\.\\[\\]\\|\\(\\)\\?\\*\\+\\{\\}])/", '\\\\$1', $search);
+    $search = preg_replace("=([/\\\\^$.[\\]|()?*+{}])=", '\\\\$1', $search);
     // Now replace instances of the search string
     $text = preg_replace_callback('/' . $search . '/i', "searchBody", $text);
     // Make the last match loop around

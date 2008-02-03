@@ -9,20 +9,13 @@ class GDBM {
   var $oldr;                    // Resource pointer for $oldfile
   var $newr;                    // Resource pointer for $newfile
   var $copycount;               // Number of keys to copy per access
-  var $lastkey;                 // the last key copied
   var $error;                   // error string for last operation
-
-  var $delete_flag;             // Leading char for deleted entry marker
-  var $escape;                  // Escape character for $delete_flag and itself
 
   function GDBM($oldfile, $newfile, $copycount=20, $handler="gdbm") {
     $this->oldfile = $oldfile;
     $this->newfile = $newfile;
     $this->copycount = $copycount;
     $this->handler = $handler;
-
-    $this->delete_flag = 'X';
-    $this->escape = '\\';
 
     $oldr = dba_open($oldfile, 'cl', $handler);
 
@@ -33,27 +26,14 @@ class GDBM {
     
     $this->oldr = $oldr;
 
-    if ($newfile == '') $this->newr = false;
-    else {
+    if ($newfile == '') {
+      $this->newfile = false;
+      $this->newr = false;
+    } else {
       if (file_exists($newfile)) {
-        $newr = dba_open($newfile, 'wl', $handler);
-        $this->newr = $newr;
+        $this->newr = dba_open($newfile, 'wl', $handler);
       } else $this->newr = false;
     }
-  }
-
-  // Escape a key value
-  function escape($key) {
-    $firstchar = substr($key, 0, 1);
-    if ($firstchar == $this->delete_flag || $firstchar == $this->escape) {
-      $key = $this->escape . $key;
-    }
-    return $key;
-  }
-
-  // Return the deleted key for a key
-  function deletedKey($key) {
-    return $this->delete_flag . $key;
   }
 
   // Get the value for a key.
@@ -61,39 +41,32 @@ class GDBM {
   // If the deleted key is in the new database, return false.
   // Otherwise, return the value in the old databae.
   function get($key) {
-    if ($key == '') return '';
-    $key = $this->escape($key);
+    $res = false;
     if ($this->newr) {
-      $res = dba_fetch($key, $this->newr);
-      if ($res) return $res;
-      if (dba_fetch($this->deletedKey($key), $this->newr)) return false;
+      $this->copysome(true);
+      if ($this->newr) $res = dba_fetch($key, $this->newr);
     }
-    return dba_fetch($key, $this->oldr);
+    if (!$res) $res = dba_fetch($key, $this->oldr);
+    return $res;
   }
 
   // Replace or set the value of $key to $value.
   // If $value is blank or false, delete $key from the database
   // Return the new value
   function put($key, $value) {
-    if ($key == '') return '';
-    $key = $this->escape($key);
     if ($value == '' || !$value) {
       // Blank or false value = delete the key
+      dba_delete($key, $this->oldr);
       if ($this->newr) {
         dba_delete($key, $this->newr);
-        dba_replace($this->deletedKey($key), '1',  $this->newr);
-        $this->copysome();
-      } else {
-        dba_delete($this->deletedKey($key), $this->oldr);
-        dba_delete($key, $this->oldr);
+        $this->copysome(true);
       }
     } else {
       if ($this->newr) {
-        dba_delete($this->deletedKey($key), $this->newr);
         dba_replace($key, $value, $this->newr);
-        $this->copysome();
+        dba_delete($key, $this->oldr);
+        $this->copysome(true);
       } else {
-        dba_delete($this->deletedKey($key), $this->oldr);
         dba_replace($key, $value, $this->oldr);
       }
     }
@@ -102,7 +75,7 @@ class GDBM {
 
   // Create a new database, if there isn't one, and start copying to it
   function startCopying() {
-    if (!$this->newr) {
+    if (!$this->newr && $this->newfile) {
       $this->newr = dba_open($this->newfile, 'cl', $this->handler);
     }
     return $this->newr;
@@ -114,13 +87,13 @@ class GDBM {
   }
 
   // Finish copying old to new, delete old, rename new to old, and reopen
-  function finishCopying() {
-    while ($this->newr) $this->copysome();
+  function finishCopying($reopen=true) {
+    while ($this->newr) $this->copysome($reopen);
   }
 
   // Close the database(s). Finish copying first if $finish_copying is true
   function close($finish_copying=false) {
-    if ($finish_copying) finishCopying();
+    if ($finish_copying) finishCopying(false);
     if ($this->oldr) {
       dba_close($this->oldr);
       $this->oldr = false;
@@ -149,49 +122,47 @@ class GDBM {
   }
 
   // Copy $this->copycount keys from old to new database
-  function copysome() {
+  function copysome($reopen) {
     for ($i=0; $i<$this->copycount; $i++) {
       if ($this->newr) {
-        // If didn't leave off last time, fetch the first key in the old database
-        $key = $this->lastkey;
-        if (!$key) $key = dba_firstkey($this->oldr);
-        else $key = dba_nextkey($this->oldr);
-        $this->lastkey = $key;
+        $key = dba_firstkey($this->oldr);
         if ($key) $this->copyone($key);
         else {
           // We're done copying.
           // Delete the old database, and rename new to old
           // Could add a user-defined archive function, which would
           // do something useful with the old database
-          $this->close();
+          $this->close(false);
           $oldsize = filesize($this->oldfile);
           $newsize = filesize($this->newfile);
           $this->error = "old size: $oldsize, new size: $newsize";
           if (unlink($this->oldfile)) {
             if (rename($this->newfile, $this->oldfile)) {
-              $this->reopen();
+              if ($reopen) $this->reopen();
             } else $this->error = "Could not rename new file to old file";
           } else $this->error = "Could not unlink old file";
+          return;
         }
-      }
+      } else return;
     }
   }
 
   // Copy one key from old to new database
   function copyone($key) {
-    if (!dba_fetch($key, $this->newr)) {
-      if (!dba_fetch($this->deletedKey($key), $this->newr)) {
+    if ($this->newr) {
+      if (!dba_fetch($key, $this->newr)) {
         $value = dba_fetch($key, $this->oldr);
         if ($value) dba_replace($key, $value, $this->newr);
       }
+      dba_delete($key, $this->oldr);
     }
   }
 
 }
 
 // Test code. Uncomment to run.
-/*
-unlink('old.db');
+if (file_exists('old.db')) unlink('old.db');
+if (file_exists('new.db')) unlink('new.db');
 $db = new GDBM('old.db', 'new.db');
 $cnt = 99;
 $loops = 10;
@@ -214,9 +185,8 @@ for ($i=1; $i<=$cnt; $i++) {
   echo "$i: " . $db->get($i) . "\n";
   if (!$db->isCopying()) $db->startCopying();
 }
-$db->finishCopying();
+$db->finishCopying(false);
 $db->close();
-*/
 
 // Copyright 2008 Bill St. Clair
 //

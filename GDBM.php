@@ -130,7 +130,7 @@ class GDBM {
         if ($key) $this->copyone($key);
         else {
           // We're done copying.
-          $this->flipDBS($reopen);
+          $this->flipDBs($reopen);
           return;
         }
       }

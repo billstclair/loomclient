@@ -472,7 +472,7 @@ function drawMain() {
 <tr>
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
-<a href="javascript:submitPage('locations');">Contact</a>
+<a href="javascript:submitPage('locations');">Contacts</a>
 &nbsp;
 <a href="javascript:submitPage('logout');">Logout</a>
 </span></td>

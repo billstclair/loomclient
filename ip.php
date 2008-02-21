@@ -29,6 +29,7 @@ $take = mq($_POST['take']);
 $give = mq($_POST['give']);
 $page = mq($_POST['page']);
 $greendot = mq($_POST['greendot']);
+$contact = mq($_POST['contact']);
 $showfolder = mq($_POST['showfolder']);
 $newname = mq($_POST['newname']);
 $oldname = mq($_POST['oldname']);
@@ -87,7 +88,7 @@ if (($session == '' && $passphrase == '') || !login()) {
   }
 }
 
-$title = "Loom Folder";
+$title = "Loom Wallet";
 
 if ($page == 'main') doMain();
 elseif ($page == 'locations') doLocations();
@@ -108,9 +109,16 @@ function doMain() {
   global $client, $folder, $folder_loc, $folder_name;
   global $values, $valueskv;
   global $message;
+  global $greendot, $contact;
 
   $id = '';
 
+  if ($greendot != '') {
+    $type = $greendot;
+    $location = $contact;
+    $qty = $values[$location][$type];
+    $take = "Take";
+  }
   if ($type != '-- choose asset --') {
     $t = $folder['types'][$type];
     if ($t) {
@@ -121,7 +129,7 @@ function doMain() {
       if ($scale == '') $scale = 0;
     }
   }
-  if ($location != '-- choose location --') {
+  if ($location != '-- choose contact --') {
     $loc = $folder['locs'][$location];
   }
   if ($id != '' && $loc != '') {
@@ -164,14 +172,15 @@ function doLocations() {
   global $savename, $delete, $add_location;
   global $session;
   global $message, $title, $onload, $page;
+  global $greendot, $cancel;
 
   $onload = 'newname';
-  $title = 'Loom Locations';
+  $title = 'Loom Contacts';
 
   if ($savename != '') {
     if ($newname == $oldname) return;
     if ($folder['locs'][$newname] != '') {
-      $message = "Duplicate Location Name";
+      $message = "Duplicate Contact Name";
       return;
     }
     $res = $client->renameFolderLocation($session, $oldname, $newname);
@@ -180,11 +189,11 @@ function doLocations() {
   }
 
   else if ($add_location != '') {
-    $title = 'Loom Add Location';
+    $title = 'Loom Add Contact';
     $page = 'add_location';
   }
 
-  else refreshFolder();
+  else if ($greendot == '' && $cancel == '') refreshFolder();
 
 }
 
@@ -217,7 +226,7 @@ function doAddLocation() {
     if ($newlocation == '') $newlocation = $client->random->random_id();
     $client->newFolderLocation($session, $newname, $newlocation);
     fullRefresh();
-    $message = "Location created: $newname";
+    $message = "Contact created: $newname";
   }
 }
 
@@ -247,8 +256,9 @@ function submitPage(page) {
   document.mainform.submit();
 }
 
-function greenDot(greendot) {
+function greenDot(greendot, contact) {
   document.forms["mainform"].greendot.value = greendot;
+  if (contact != "") document.forms["mainform"].contact.value = contact;
   document.mainform.submit();
 }
 
@@ -413,13 +423,16 @@ function drawValues($name, $typevalues) {
   if (is_array($typevalues)) {
     $str = '';
     foreach ($typevalues as $type => $value) {
+      $link = '<a class="plain" href="javascript: greenDot(' . "'" .
+              hsc($type) . "', '" . hsc($name) . "')" . '" title="Take">';
       if ($value != 0) {
         if ($str == '') {
-          $str .= "<b>$name</b>\n";
+          $str .= "<b>" . hsc($name) . "</b>\n";
           $str .= '<table border="0"><tr><td width="50px">&nbsp;</td><td>';
           $str .= '<table border="0">' . "\n";
         }
-        $str .= '<tr><td align="right">' . $value . "<td><td>$type</td></tr>\n";
+        $str .= '<tr><td align="right">' . $link . $value . "</a></td>\n" .
+                "<td>" . $link . $type. "</a></td></tr>\n";
       }
     }
     if ($str != '') {
@@ -459,7 +472,7 @@ function drawMain() {
 <tr>
 <td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('refresh');">Refresh</a>
 &nbsp;
-<a href="javascript:submitPage('locations');">Locations</a>
+<a href="javascript:submitPage('locations');">Contact</a>
 &nbsp;
 <a href="javascript:submitPage('logout');">Logout</a>
 </span></td>
@@ -470,6 +483,8 @@ function drawMain() {
 ?>
 <table border="0" width="99%">
 <form name="mainform" method="post" action="" autocomplete="off">
+<input type="hidden" name="greendot" value=""/>
+<input type="hidden" name="contact" value=""/>
 <?
 writeSessionInfo();
 hiddenValue('page');
@@ -495,7 +510,7 @@ foreach ($folder['types'] as $typename => $typearray) {
 <td></td>
 <td>
 <select name="location" style="font-size: 10pt;">
-<option value="">-- choose location --</option>
+<option value="">-- choose contact --</option>
 <?
 foreach($values as $loc => $value) {
   if ($loc != $folder_name) {
@@ -519,7 +534,6 @@ foreach($values as $loc => $value) {
     echo '<tr><td></td><td class="alarm">' . hsc($message) . "</td></tr>\n";
   }
 ?></table>
-</form>
 <?
   foreach ($values as $name => $typevalues) {
     if ($name != $folder_name) {
@@ -527,6 +541,8 @@ foreach($values as $loc => $value) {
     }
   }
 ?>
+<p>Tap a value or asset name to take all the assets in that line.</p>
+</form>
 <?
 }
 
@@ -539,9 +555,9 @@ function drawLocations() {
 ?>
 <table border="0" width="99%" cellpadding="3">
 <tr>
-<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('main');">Folder</a>
+<td colspan="2" style="background-color: #c0c0c0; text-align: center;"><span style="font-weight: normal; font-size: 110%;"><a href="javascript:submitPage('main');">Wallet</a>
 &nbsp;
-<a href="javascript:submitPage('locations');"><b>Locations</b></a>
+<a href="javascript:submitPage('locations');"><b>Contacts</b></a>
 &nbsp;
 <a href="javascript:submitPage('logout');">Logout</a>
 </span></td>
@@ -561,11 +577,16 @@ function drawLocations() {
 <input type="hidden" name="greendot" value=""/>
 <table>
 <tr>
-<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $folder_name; ?>')" title="Edit Name">&nbsp;&bull;&nbsp;</a></td>
+  <td valign="top">
+  <a class="name_dot" href="javascript: greenDot('<? echo $folder_name; ?>', '')" title="Edit Name">&nbsp;&bull;&nbsp;</a>
+  </td>
 <?
   echo "<td>";
-  if ($greendot != $folder_name) echo "<b>$folder_name</b>";
-  else {
+  if ($greendot != $folder_name) {
+     echo '<a class="plain" href="javascript: greenDot(' . "'" .
+          hsc($folder_name) . "', '')" . '" title="Edit Name"><b>' .
+          $folder_name . '</b></a>';
+  } else {
     echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . hsc($folder_name) . '"/><br/>' . "\n";
     echo '<input type="hidden" name="oldname" value="' . hsc($folder_name) . '"/>' . "\n";
     echo '<input type="submit" name="savename" value="Save"/>' . "\n";
@@ -577,11 +598,16 @@ function drawLocations() {
     if ($name != $folder_name) {
 ?>
 <tr>
-<td valign="top"><a class=name_dot href="javascript: greenDot('<? echo $name; ?>')" title="Edit Name or Delete Folder">&nbsp;&bull;&nbsp;</a></td>
+<td valign="top">
+<a class=name_dot href="javascript: greenDot('<? echo $name; ?>', '')" title="Edit Name or Delete Folder">&nbsp;&bull;&nbsp;</a>
+</td>
 <?
       echo "<td>";
-      if ($greendot != $name) echo $name;
-      else {
+      if ($greendot != $name) {
+        echo '<a class="plain" href="javascript: greenDot(' . "'" .
+        hsc($name) . "', '')" . '" title="Edit Name or Delete Wallet">' .
+        $name . '</a>';
+      } else {
         echo '<input style="font-size: 12pt;" type="text" size="25" name="newname" value="' . hsc($name) . '"/><br/>' . "\n";
         echo '<input type="hidden" name="oldname" value="' . hsc($name) . '"/>' . "\n";
         echo '<input type="submit" name="savename" value="Save"/>' . "\n";
@@ -597,10 +623,10 @@ function drawLocations() {
     echo '<tr><td colspan="2" class="alarm">' . hsc($message) . "</td></tr>\n";
   }
 ?>
-<tr><td colspan="2"><input type="submit" name="add_location" value="Add Location"/></td></tr>
+<tr><td colspan="2"><input type="submit" name="add_location" value="Add Contact"/></td></tr>
 </table>
 
-<p>Click the green dot by a folder name to see its hex value, or to rename or delete it.</p>
+<p>Tap a contact name to see its hex value, or to rename or delete it.</p>
 <?
 }
 
@@ -619,7 +645,7 @@ hiddenValue('commit');
 ?>
 Enter name:<br/>
 <input type="text" name="newname" style="font-size: 14pt;" size="25" value="<? echo $newname; ?>" onkeydown="submitOnRet(event, this.form)"/><br/>
-Enter Location, blank for random:<br/>
+Enter Contact, blank for random:<br/>
 <input type="text" style="font-size: 11pt;" size="32" name="newlocation" value="<? echo $newlocation; ?>" onkeydown="submitOnRet(event, this.form)"/>
 <table>
 <tr>

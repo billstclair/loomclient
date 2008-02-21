@@ -386,7 +386,7 @@ class LoomClient
                                'session' => $session,
                                'add_location' => '1',
                                'loc' => $newlocation,
-                               'nickname' => $newname,
+                               'name' => $newname,
                                'save' => 'Save'),
                          $url);
   }

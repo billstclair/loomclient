@@ -117,7 +117,7 @@ function doMain() {
     $type = $greendot;
     $location = $contact;
     $qty = $values[$location][$type];
-    $take = "Take";
+    if ($location != $folder_name) $take = "Take";
   }
   if ($type != '-- choose asset --') {
     $t = $folder['types'][$type];
@@ -420,11 +420,14 @@ function hiddenValue($name) {
 }
 
 function drawValues($name, $typevalues) {
+  global $folder_name;
+  if ($name == $folder_name) $title = 'Move to Qty &amp; asset type';
+  else $title = 'Take';
   if (is_array($typevalues)) {
     $str = '';
     foreach ($typevalues as $type => $value) {
       $link = '<a class="plain" href="javascript: greenDot(' . "'" .
-              hsc($type) . "', '" . hsc($name) . "')" . '" title="Take">';
+              hsc($type) . "', '" . hsc($name) . "')" . '" title="' . $title . '">';
       if ($value != 0) {
         if ($str == '') {
           $str .= "<b>" . hsc($name) . "</b>\n";

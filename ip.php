@@ -115,9 +115,11 @@ function doMain() {
 
   if ($greendot != '') {
     $type = $greendot;
-    $location = $contact;
-    $qty = $values[$location][$type];
-    if ($location != $folder_name) $take = "Take";
+    $qty = $values[$contact][$type];
+    if ($contact != $folder_name) {
+      $location = $contact;
+      $take = "Take";
+    }
   }
   if ($type != '-- choose asset --') {
     $t = $folder['types'][$type];
@@ -528,8 +530,8 @@ foreach($values as $loc => $value) {
 </tr><tr>
 <td></td>
 <td>
-<input style="font-size: 10pt;" type="submit" name="take" value="Take"/>
 <input style="font-size: 10pt;" type="submit" name="give" value="Give"/>
+<input style="font-size: 10pt;" type="submit" name="take" value="Take"/>
 </td>
 </tr>
 <?

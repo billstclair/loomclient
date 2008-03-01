@@ -98,6 +98,12 @@ Uses GDBM for persistence, like Loom itself. http://www.gnu.org/software/gdbm/
 
 Python. It's nice, supports GDBM, and has a portable GUI: http://wxpython.org/ . I'd actually prefer Lisp, but it isn't as well known and doesn't, yet, have a portable GUI, unless I were to port wxWidgets myself. I could also use Java, but Java development isn't interactive enough, nor is its GUI as easy to use.
 
+** wxPython info
+
+Running the wxPython demo:
+
+  python /Developer/Examples/wxWidgets/wxPython/demo/demo.py
+
 * Emacs control cruft
 
 ** Note

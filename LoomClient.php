@@ -217,6 +217,11 @@ class LoomClient
     return $value;
   }
 
+  function unscale($value, $scale) {
+    if ($scale >= 0) return bcmul($value, bcpow(10, $scale, 0), 0);
+    return $value;
+  }
+
   function buy_archive($loc, $usage, &$url) {
     return $this->get(array('function' => 'archive',
                             'action' => 'buy',
@@ -254,6 +259,93 @@ class LoomClient
                             'usage' => $usage,
                             'content' => $content),
                       $url);
+  }
+
+  // Vending machines aren't implemented yet at Loom.cc,
+  // So fake it.
+  // Returns four different machines for first byte of $id mod 4 being 0, 1, 2, or 3
+  // Machine id of all 0 is invalid.
+  function query_vend($id, $key, &$url) {
+    $res = array('function' => 'queryvend',
+                 'id' => $id,
+                 'status' => 'success');
+    if ($id == 0) {
+      $res['status'] = 'error';
+      return;
+    }
+    $val = 3 & hexdec(substr($id, 0, 1));
+    $assets = $this->knownAssets();
+    $dollars = $assets['Cartwheel USD'];
+    $goldgrams = $assets['Patrick GoldGrams'];
+    $tokens = $assets['usage tokens'];
+    if ($val == 0) {
+      $res['input'] = $this->unscale(30, $dollars['scale']) . ':' .
+        $dollars['id'] . ' ' .
+        $this->unscale(15, $tokens['scale']) . ':' . $tokens['id'];
+      $res['output'] = $this->unscale(1, $goldgrams['scale']) . ':' .
+        $goldgrams['id'];
+    } else if ($val == 1) {
+      $res['input'] = $this->unscale(1, $goldgrams['scale']) . ':' .
+        $goldgrams['id'];
+      $res['output'] = $this->unscale(30, $dollars['scale']) . ':' .
+        $dollars['id'];
+    } else if ($val == 2) {
+      $res['input'] = $this->unscale(1, $dollars['scale']) . ':' .
+        $dollars['id'];
+      $res['output'] = $this->unscale(100, $tokens['scale']) . ':' .
+        $tokens['id'];
+    } else {
+      $res['input'] = $this->unscale(100, $tokens['scale']) . ':' .
+        $tokens['id'];
+      $res['output'] = $this->unscale(1, $dollars['scale']) . ':' .
+        $dollars['id'];
+    }
+    return $res;
+  }
+
+  // From https://loom.cc//?function=view&hash=db53fd011eb53ee9c4dbb5a88198cb3e34e1778feeaf3b2a118e619425ecbf6a
+  // Returns an array mapping the id and name of each known asset to
+  // an array mapping 'id', 'scale', 'precision', and 'name' to that asset's
+  // properties.
+  function knownAssets() {
+    $curs = array(array('id' => '00000000000000000000000000000000',
+                        'scale' => 0,
+                        'precision' => 0,
+                        'name' => 'usage tokens'),
+                  array('id' => 'a67b4f153e85d7cc6c846893dac1155c',
+                        'scale' => 2,
+                        'precision' => 2,
+                        'name' => 'Cartwheel USD'),
+                  array('id' => '1650f617c024d6441461b2538c6d9540',
+                        'scale' => 7,
+                        'precision' => 3,
+                        'name' => 'GoldNowBanc GoldGrams'),
+                  array('id' => 'c9c5ccc9957c3c8c0bec320c16da451a',
+                        'scale' => 2,
+                        'precision' => 2,
+                        'name' => 'GoldNowBanc USD'),
+                  array('id' => '40c28abac43d0001fd2aa5b705929852',
+                        'scale' => 2,
+                        'precision' => 0,
+                        'name' => 'MetroPipe Tunneler Pro Tokens 1 Month'),
+                  array('id' => 'd43b8563ea999c1f53279b60142be5fe',
+                        'scale' => 2,
+                        'precision' => 2,
+                        'name' => 'Capulin Currency $'),
+                  array('id' => 'f0d4c8bd09e9c8c276af9ddd7c514495',
+                        'scale' => 7,
+                        'precision' => 3,
+                        'name' => 'Wontongold Grams'),
+                  array('id' => '26ef701a952fe3d641a69bf859db71c2',
+                        'scale' => 7,
+                        'precision' => 3,
+                        'name' => 'Patrick GoldGrams'));
+    $res = array();
+    foreach ($curs as $cur) {
+      $res[$cur['id']] = $cur;
+      $res[$cur['name']] = $cur;
+    }
+    return $res;
   }
 
   function url($prefix, $keys) {

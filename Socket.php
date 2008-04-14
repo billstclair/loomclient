@@ -67,16 +67,8 @@ Class Socket {
 
 
 	function get($uri) {
-          return $this->getOrPost($uri, 'GET');
-        }
-
-        function post($uri) {
-          return $this->getOrPost($uri, 'POST');
-        }
-
-        function getOrPost($uri, $getOrPost) {
 		$request =
-			"$getOrPost $uri HTTP/1.1\r\n" .
+			"GET $uri HTTP/1.1\r\n" .
 			"Host: $this->host\r\n" .
 			"Connection: Keep-Alive\r\n" .
                   //"Accept: $this->accept\r\n" .

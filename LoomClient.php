@@ -189,7 +189,7 @@ class LoomClient
   }
 
   function applyScale($value, $min_precision, $scale) {
-    if ($value < 0) $value++;
+    if ($value < 0) $value = bcadd($value, 1);
     if ($scale > 0) $value = bcdiv($value, bcpow(10, $scale, 0), $scale);
 
     $dotpos = strpos($value, '.');

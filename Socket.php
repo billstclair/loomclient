@@ -124,8 +124,13 @@ Class Socket {
 		}
 
 		if (isset($length) and strpos($this->te, 'chunked') === false) {
-			$this->body = fread($this->fp, $length);
-			return ;
+                  $this->body = '';
+                  while ($length > 0) {
+                    $str = fread($this->fp, $length);
+                    $this->body .= $str;
+                    $length -= strlen($str);
+                  }
+                  return ;
 		}
 
 		// chunked encoding

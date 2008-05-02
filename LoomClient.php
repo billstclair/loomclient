@@ -641,7 +641,7 @@ class LoomClient
 
   function leftPadHex($hex, $chars) {
     if (strlen($hex) < $chars) {
-      $hex = str_repeat("0", $chars - $strlen($hex)) . $hex;
+      $hex = str_repeat("0", $chars - strlen($hex)) . $hex;
     }
     return $hex;
   }

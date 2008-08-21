@@ -1,14 +1,13 @@
-viewtext.php
-viewtext.txt
-index.html
-Cipher.php
-Diceware.php
-GDBM.php
-LoomClient.php
-LoomRandom.php
-Socket.php
-bcbitwise.php
-grid-tutorial.php
-ip.php
-utilities.php
-loomsheet/design.txt
+viewtext.php|The file that generated this listing
+viewtext.txt|The list of files that viewtext.php will show you
+index.html|The index file for this directory
+Cipher.php|Encryption, decryption, hashing
+Diceware.php|Generate random sequences
+GDBM.php|GDB with live compression
+LoomClient.php|Client for loom.cc
+LoomRandom.php|Random number generator
+Socket.php|HTTP socket with keep-alive
+bcbitwise.php|Bitwise operations on arbitrary-length integers
+grid-tutorial.php|A PHP version of Loom's grid tutorial
+ip.php|An iPhone interface to Loom.cc
+loomsheet/design.txt|Design document for Loomsheet

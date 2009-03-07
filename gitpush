@@ -1,2 +1,3 @@
 # Push the HEAD to the shared repository
+git push github --tags HEAD
 git push git+ssh://repo.or.cz/srv/git/loomclient.git --tags HEAD

@@ -1,0 +1,227 @@
+iqn = input quantity n
+ian = input asset type n
+oqn = output quantity n
+oan = output asset type n
+id = machine public id
+key = machine private key
+inv = inventory location
+loc = trading location
+
+Defining or changing a machine:
+
+Input:
+(
+:function
+=defvend
+:inputs
+=2
+:outputs
+=1
+:iq1
+=30
+:ia1
+=<dollars>
+:iq2
+=10
+:ia2
+=<usage tokens>
+:oq1
+=1
+:oa1
+=<gold grams>
+:id
+=<public id>
+:key
+=<key>
+:inv
+=<inventory location>
+)
+
+Output: echo of input, plus status (OK or Error)
+
+
+Input:
+(
+:function
+=queryvend
+:id
+=<public id>
+)
+
+Output:
+
+(
+:function
+=queryvend
+:id
+=<public id>
+:inputs
+=2
+:outputs
+=1
+:iq1
+=30
+:ia1
+=<dollars>
+:iq2
+=10
+:ia2
+=<usage tokens>
+:status
+=<OK or error type>
+)
+
+Input:
+(:function
+=vend
+:inputs
+=2
+:outputs
+=1
+:iq1
+=32
+:ia1
+=<dollars>
+:iq2
+=12
+:ia2
+=<usage tokens>
+:oq1
+=1
+:oa1
+=<gold grams>
+:id
+=<public id>
+:loc
+=<trading location>
+)
+
+Output:
+(:function
+=vend
+:inputs
+=2
+:outputs
+=1
+:iq1
+=30
+:ia1
+=<dollars>
+:iq2
+=10
+:ia2
+=<usage tokens>
+:oq1
+=1
+:oa1
+=<gold grams>
+:id
+=<public id>
+:loc
+=<trading location>
+:count
+=<Number of quanta satisfied>
+:status
+=<OK or error type>
+)
+
+Fairness.
+
+Ratio of input quantity to output quantity offerred has to be less than or equal to the ratio of input quantity to output quantity bid for all input/output pairs.
+
+So if you're selling 1 gram of gold for 30 dollars plus 10 asset tokens, and I offer 32 dollars plus 12 asset tokens for 0.8 grams of gold, the trade would go through:
+
+Offered:
+30 / 1 = 30
+10 / 1 = 10
+
+Bid:
+32 / 0.8 = 40
+12 / 0.8 = 15
+
+30 < 40 & 10 < 15
+
+However, if I offer 32 dollars plus 7 asset tokens for 0.8 grams of gold, the trade would NOT go through.
+
+32 / 0.8 = 40
+7 / 0.8 = 8.75
+
+30 < 40, but 10 > 8.75
+
+Additionally, you have to be able to satisfy at least all the output amounts listed in the bid (this could be one of a chain of bids that the client has put together).
+
+Different representation:
+
+Input:
+(
+:function
+=defvend
+:input
+=30:<dollars> 10:<usage tokens>
+:output
+=1:<gold grams>
+:id
+=<public id>
+:key
+=<key>
+:inv
+=<inventory location>
+)
+
+Output: echo of input, plus status (OK or Error)
+
+
+Input:
+(
+:function
+=queryvend
+:id
+=<public id>
+)
+
+Output:
+
+(
+:function
+=queryvend
+:id
+=<public id>
+:input
+=30:<dollars> 10:<usage tokens>
+:output
+=1:<gold grams>
+:status
+=<OK or error type>
+)
+
+Include the key in queryvend and you'll get the inventory location out.
+
+Input:
+(:function
+=vend
+:input
+=30:<dollars> 10:<usage tokens>
+:output
+=1:<gold grams>
+:id
+=<public id>
+:loc
+=<trading location>
+)
+
+Output:
+(:function
+=vend
+:input
+=30:<dollars> 10:<usage tokens>
+:output
+=1:<gold grams>
+:id
+=<public id>
+:loc
+=<trading location>
+:count
+=<Number of quanta satisfied>
+:status
+=<OK or error type>
+)

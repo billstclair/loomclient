@@ -1,2 +1,2 @@
 cd ..
-tar --exclude=.git --exclude=temp.php --no-wildcards -czf loomclient.tar.gz loomclient
+tar --exclude=.git --exclude=temp.php --exclude=keyboard --no-wildcards -czf loomclient.tar.gz loomclient

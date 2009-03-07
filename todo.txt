@@ -1,0 +1,24 @@
+ip.php
+======
+
+Encrypt passphrase and other info. Store in a single field. Call it "magic" or somesuch.
+
+Keep the encrypted passphrase in a cookie. Use short password to unlock it.
+Or just have an account with a shorter passphrase.
+
+grid-tutorial.php
+=================
+
+Display the results next to the location to which they apply, so you don't have to scroll down to see them.
+
+
+GUI
+===
+
+http://pythoncard.sourceforge.net/
+
+Docs
+====
+
+Write a drop-point tutorial.
+Write a folder move tutorial (passphrase change).

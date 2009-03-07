@@ -28,11 +28,7 @@ class LoomClient
   /* Save the old non-persistent connection version
   function get($keys, &$url) {
     $url = $this->url($this->url_prefix, $keys);
-    // Kluge around protocol warning
-    // I really want try/finally here, but PHP doesn't have it
-    $erpt = $this->disable_warnings();
-    $kv = file_get_contents($url);
-    $this->reenable_warnings($erpt);
+    $kv = @file_get_contents($url);
     return $this->parsekv($kv);
   }
   */
@@ -167,7 +163,7 @@ class LoomClient
       $typea[$id] = $attributes;
     }
 
-    $res = $this->scan($locstring, $typestring, $zeroes, &$url);
+    $res = $this->scan($locstring, $typestring, $zeroes, $url);
 
     $resa = array();
     foreach ($loca as $id => $locname) {
@@ -576,7 +572,7 @@ class LoomClient
             $res .= substr($cstring, $i-1);
             break;
           }
-          sscanf(substr($cstring, $i, 3), '%o', &$n);
+          sscanf(substr($cstring, $i, 3), '%o', $n);
           $res .= chr($n);
           $i += 2;
         }
@@ -588,18 +584,6 @@ class LoomClient
       $i++;
     }
     return $res;
-  }
-
-  // This enables a kluge in get() to turn off the protocol warning that
-  // results from doing a HTTP GET to http://loom.cc/
-  function disable_warnings() {
-    $erpt = error_reporting();
-    error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
-    return $erpt;
-  }
-
-  function reenable_warnings($erpt) {
-    error_reporting($erpt);
   }
 
   // Return the sha256 hash of a string.

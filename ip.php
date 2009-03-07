@@ -44,10 +44,8 @@ $client = new LoomClient();
 // Redefine $encrypt_key if you want to use one.
 // It should be a 32-character hex string, as generated
 // by the grid-tutotial.php "Tools" page.
-$client->disable_warnings();
 $encrypt_key = '';
-include "ip-config.php";
-$client->reenable_warnings();
+@include "ip-config.php";
 
 $cipher = '';
 $session_cipher = '';

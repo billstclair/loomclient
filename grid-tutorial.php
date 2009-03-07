@@ -646,7 +646,7 @@ Loom server:
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Trubanc.com
+ * The Original Code is LoomClient PHP library
  *
  * The Initial Developer of the Original Code is
  * Bill St. Clair.

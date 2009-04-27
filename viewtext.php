@@ -8,10 +8,10 @@ function mq($x) {
   else return $x;
 }
 
-$file = mq($_GET['file']);
-$title = mq($_GET['title']);
-$numbers = mq($_GET['numbers']);
-$search = mq($_GET['search']);
+$file = mq(@$_GET['file']);
+$title = mq(@$_GET['title']);
+$numbers = mq(@$_GET['numbers']);
+$search = mq(@$_GET['search']);
 
 $file = trim($file);
 

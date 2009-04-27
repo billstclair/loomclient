@@ -11,3 +11,4 @@ bcbitwise.php|Bitwise operations on arbitrary-length integers
 grid-tutorial.php|A PHP version of Loom's grid tutorial
 ip.php|An iPhone interface to Loom.cc
 loomsheet/design.txt|Design document for Loomsheet
+mpl.txt|Mozilla Public License, with option to use GPL, LGPL, or Apache

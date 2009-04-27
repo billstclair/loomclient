@@ -1,1 +1,2 @@
-echo "$SITE5:/home/billstcl/www/loom"
+echo $HUBD:/usr/local/www/billstclair.com/www/loom
+
